@@ -18,6 +18,14 @@ Informe quais _labels_ devemos adicionar, contendo o nível de experiência dese
 
 **Atenção**: Não aceitaremos vagas sem o nome da empresa contratante.
 
+## Como receber atualizações das vagas
+
+Você pode receber atualizações das vagas no seu email ou via notificações do GitHub, basta clicar em **Watch** e, em seguida, clicar em **Watching** no canto superior direito da interface do site, próximo a sua foto de perfil.
+
+<p align="center">
+  <img src="http://s31.postimg.org/nt5f6bbff/watch_github_forum.png" alt="Watch GitHub repo"/>
+</p>
+
 #### Importante
 
 Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê manutenção à sua issue, a cada 14 dias (2 semanas) coloque um comentário que continua procurando para a vaga ou feche a mesma comentando se a pessoa foi contratada através do nosso grupo ou por fora. Caso a issue passe de 14 dias e não tiver manutenção, a mesma será fechada por um moderador do repositório.
