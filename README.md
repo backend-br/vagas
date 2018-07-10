@@ -37,6 +37,7 @@ Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê
 - [Vagas para desenvolvedores no Ceará](https://github.com/CangaceirosDevels/vagas_de_emprego)
 - [Vagas para desenvolvedores iOS e OSX](https://github.com/CocoaHeadsBrasil/vagas)
 - [Vagas para desenvolvedores PHP](https://github.com/phpdevbr/vagas)
+- [Vagas para desenvolvedores Python](https://pyjobs.com.br)
 - [Vagas para desenvolvedores Stone Pagamentos](https://github.com/stone-pagamentos/vagas)
 
 ## Licença
