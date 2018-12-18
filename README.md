@@ -40,6 +40,7 @@ Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê
 - [Vagas para desenvolvedores Python](https://pyjobs.com.br)
 - [Vagas para desenvolvedores Stone Pagamentos](https://github.com/stone-pagamentos/vagas)
 - [Vagas para desenvolvedores Vue.js](https://github.com/vuejs-br/vagas)
+- [Vagas para desenvolvedores B2W Digital](https://github.com/B2W-BIT/Vagas)
 
 ## Licença
 
