@@ -1,5 +1,10 @@
 ---
-title: '[NOME_DA_CIDADE] [TÍTUTLO_DA_VAGA] na [NOME_DA_EMPRESA]'
+name: Nova vaga
+about: Template utilizado para a criação de novas vagas
+title: "[NOME_DA_CIDADE] [TÍTUTLO_DA_VAGA] na [NOME_DA_EMPRESA]"
+labels: ''
+assignees: ''
+
 ---
 
 # [TÍTULO_DA_VAGA]
@@ -58,4 +63,3 @@ Ex: Empresa de pequeno porte que atende clientes do segmento de alimentação,bu
 *Modo de se inscrever na vaga
 
 Ex: Cadastrar currículo no site X
-
