@@ -41,6 +41,7 @@ Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê
 - [Vagas para desenvolvedores Stone Pagamentos](https://github.com/stone-pagamentos/vagas)
 - [Vagas para desenvolvedores Vue.js](https://github.com/vuejs-br/vagas)
 - [Vagas para desenvolvedores Go/Golang](https://github.com/Gommunity/vagas)
+- [Vagas para UI/UX](https://github.com/uxbrasil/vagas)
 
 ## Licença
 
