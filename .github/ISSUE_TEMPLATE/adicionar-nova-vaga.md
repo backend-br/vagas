@@ -7,12 +7,12 @@ title: "[Cidade] Back-end Developer @ Nome da Empresa"
 
 <!-- 
 ==================================================
-POR FAVOR, SÓ POSTE SE A VAGA FOR PARA FRONT-END!
+POR FAVOR, SÓ POSTE SE A VAGA FOR PARA BACK-END!
 
 Não faça distinção de gênero no título da vaga.
 
 Use: "Back-End Developer" ao invés de 
-"Desenvolvedor Front-End" \o/
+"Desenvolvedor Back-End" \o/
 
 Exemplo: `[São Paulo] Back-End Developer @ NOME DA EMPRESA`
 ==================================================
