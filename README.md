@@ -43,6 +43,8 @@ Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê
 - [Vagas para desenvolvedores Python](https://pyjobs.com.br)
 - [Vagas para desenvolvedores Vue.js](https://github.com/vuejs-br/vagas)
 - [Vagas para desenvolvedores Go/Golang](https://github.com/Gommunity/vagas)
+- [Vagas para Flutter](https://github.com/flutter-brazil/vagas)
+- [Vagas para React/React Native](https://github.com/react-brasil/vagas)
 - [Vagas para desenvolvedores .NET](https://github.com/dotnetdevbr/vagas)
 - [Vagas para desenvolvedores Rust](https://github.com/rustdevbr/vagas)
 
