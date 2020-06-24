@@ -7,7 +7,7 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/stale@v1
+    - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
         stale-issue-message: 'Esta vaga encontra-se há um bom tempo sem novas interações. Se ainda estiver aberta, faça um comentário, caso contrario, a fecharemos automaticamente em 5 dias.'
