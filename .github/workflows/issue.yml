@@ -9,4 +9,5 @@ jobs:
       - uses: Renato66/auto-label@v2
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
+          labels-synonyms: '{"Remoto durante pandemia":["Vaga Remota durante a pandemia"]}'
           labels-not-allowed: '["Falta Informações","Request changes","stale"]'
