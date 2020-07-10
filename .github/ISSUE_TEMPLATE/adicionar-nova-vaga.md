@@ -4,7 +4,11 @@ about: Não esqueça de seguir todas as instruções do template antes de abrir 
 title: "[Cidade] Back-end Developer @ Nome da Empresa"
 
 ---
-
+<!--
+==================================================
+Caso a vaga for remoto durante a pandemia informar no texto "Remoto durante o covid"
+==================================================
+-->
 <!-- 
 ==================================================
 POR FAVOR, SÓ POSTE SE A VAGA FOR PARA BACK-END!
@@ -17,6 +21,12 @@ Use: "Back-End Developer" ao invés de
 Exemplo: `[São Paulo] Back-End Developer @ NOME DA EMPRESA`
 ==================================================
 -->
+<!--
+==================================================
+Caso a vaga for remoto durante a pandemia deixar a linha abaixo
+==================================================
+-->
+> Vaga Remota durante a pandemia
 
 ## Nossa empresa
 
