@@ -1,75 +1,65 @@
+<!--suppress HtmlDeprecatedAttribute -->
+
 <p align="center">
   <img src="https://avatars3.githubusercontent.com/u/30732658?v=4&s=200.jpg" alt="BackEndBR" width="230" />
 </p>
 
-# Vagas (Somente vagas de Back-End)
+# Vagas
 
-Espaço para a divulgação de vagas para desenvolvedores via _issues_ do Github.
+Espaço para a divulgação de vagas para desenvolvedores back-end via issues do Github.
 
-Vagas disponíveis em https://github.com/backend-br/vagas/issues
+## Como cadastrar uma vaga?
 
-### Cadastrando uma vaga
+Abra uma [issue](https://github.com/backend-br/vagas/issues/new/choose), e no título, coloque o **nome da cidade**,
+seguido da **descrição da vaga**, e **nome da empresa**. Siga o modelo padrão gerado pela issue.
 
-[Abra uma **issue**](https://github.com/backend-br/vagas/issues/new/choose) e, no titulo desta _issue_, coloque o nome da cidade entre colchetes seguido do nome da vaga e nome da empresa.
+Adicionalmente, informe quais labels devemos adicionar, contendo o nível de experiência desejada e a forma de contração.
 
-Exemplo: `[São Paulo] Back-End Developer na [NOME DA EMPRESA]`
+## Como receber atualizações das vagas?
 
-Informe quais _labels_ devemos adicionar, contendo o nível de experiência desejada e a forma de contração.
+Você pode receber atualizações das vagas no seu e-mail ou via notificações do GitHub, basta clicar **Subscribe**, na
+issue que você tem interesse.
 
-**Atenção**: Não aceitaremos vagas sem o nome da empresa contratante.
+<p align="center">
+    <img src="doc/images/subscribe.jpg" alt="subscribe."/>
+    <br />
+    <tl>Ativar notificações.</tl>
+</p>
 
-## Como receber atualizações das vagas
+## Outros repositórios de vagas
 
-Você pode receber atualizações das vagas no seu email ou via notificações do GitHub, basta clicar em **Watch** e, em seguida, clicar em **Watching** no canto superior direito da interface do site, próximo a sua foto de perfil.
+### Por área
 
-#### Importante
-
-Para evitar que possíveis candidatos enviem cvs para vagas já preenchidas, dê manutenção à sua issue, a cada 14 dias (2 semanas) coloque um comentário que continua procurando para a vaga ou feche a mesma comentando se a pessoa foi contratada através do nosso grupo ou por fora. Caso a issue passe de 14 dias e não tiver manutenção, a mesma será fechada por um moderador do repositório.
-
-### Outros repositórios de vagas
-
-#### Por área
-
-- [Vagas para desenvolvedores Back-End](https://github.com/backend-br/vagas)
-- [Vagas para desenvolvedores Front-End](https://github.com/frontendbr/vagas)
-- [Vagas para desenvolvedores Chat-Bot](https://github.com/chatbotbr/vagas)
-- [Vagas para UI/UX](https://github.com/uxbrasil/vagas)
 - [Vagas para QAs](https://github.com/qa-brasil/vagas)
+- [Vagas para Chat-Bot](https://github.com/chatbotbr/vagas)
+- [Vagas para Back-End](https://github.com/backend-br/vagas)
+- [Vagas para Front-End](https://github.com/frontendbr/vagas)
 
-#### Por tecnologia
+### Por tecnologia
 
-- [Vagas para desenvolvedores Android](https://github.com/androiddevbr/vagas)
-- [Vagas para desenvolvedores iOS e OSX](https://github.com/CocoaHeadsBrasil/vagas)
-- [Vagas para desenvolvedores PHP](https://github.com/phpdevbr/vagas)
-- [Vagas para desenvolvedores Python](https://pyjobs.com.br)
-- [Vagas para desenvolvedores Vue.js](https://github.com/vuejs-br/vagas)
-- [Vagas para desenvolvedores Go/Golang](https://github.com/Gommunity/vagas)
+- [Vagas para PHP](https://github.com/phpdevbr/vagas)
+- [Vagas para .NET](https://github.com/dotnetdevbr/vagas)
+- [Vagas para Rust](https://github.com/rustdevbr/vagas)
+- [Vagas para Vue.js](https://github.com/vuejs-br/vagas)
+- [Vagas para Android](https://github.com/androiddevbr/vagas)
 - [Vagas para Flutter](https://github.com/flutter-brazil/vagas)
+- [Vagas para iOS e OSX](https://github.com/CocoaHeadsBrasil/vagas)
+- [Vagas para Go/Golang](https://github.com/Gommunity/vagas)
 - [Vagas para React/React Native](https://github.com/react-brasil/vagas)
-- [Vagas para desenvolvedores .NET](https://github.com/dotnetdevbr/vagas)
-- [Vagas para desenvolvedores Rust](https://github.com/rustdevbr/vagas)
 
-#### Por localidade
+### Por localidade
 
-- [Vagas para desenvolvedores no Ceará](https://github.com/CangaceirosDevels/vagas_de_emprego)
-- [Vagas para desenvolvedores Front-end (Angola)](https://github.com/frontend-ao/vagas)
-- [Vagas para desenvolvedores Back-end (Angola)](https://github.com/backend-ao/vagas)
-- [Vagas para desenvolvedores Front-end (Portugal)](https://github.com/frontend-pt/vagas)
-- [Vagas para desenvolvedores Back-end (Portugal)](https://github.com/backend-pt/vagas)
+- [Vagas para no Ceará](https://github.com/CangaceirosDevels/vagas_de_emprego)
+- [Vagas para Back-end (Angola)](https://github.com/backend-ao/vagas)
+- [Vagas para Back-end (Portugal)](https://github.com/backend-pt/vagas)
+- [Vagas para Front-end (Angola)](https://github.com/frontend-ao/vagas)
+- [Vagas para Front-end (Portugal)](https://github.com/frontend-pt/vagas)
 
 ## Licença
 
-[MIT](/LICENSE) &copy; BackEndBR
-
-## Repositórios do Back-End Brasil
-
-- [Fórum](https://github.com/backend-br/forum)
-- [Eventos](https://github.com/backend-br/eventos)
-- [Vagas](https://github.com/backend-br/vagas)
-- [Colabore](https://github.com/backend-br/colabore)
-- [Poste mais!](https://github.com/backend-br/poste-mais)
-- [Awesome Back-End](https://github.com/backend-br/awesome-backend)
+Licenciado sob [MIT](/LICENSE).
 
 ## Agradecimento
 
-Especial para a comunidade [Front-End BR](https://github.com/frontendbr/) que nos inspirou, e essa página é um fork deles :)
+Agradecemos a comunidade [Front-end Brasil](https://github.com/frontendbr) que nos inspirou, e essa página é um fork
+deles.
