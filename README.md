@@ -40,6 +40,7 @@ issue que você tem interesse.
 - [Vagas para PHP](https://github.com/phpdevbr/vagas)
 - [Vagas para .NET](https://github.com/dotnetdevbr/vagas)
 - [Vagas para Rust](https://github.com/rustdevbr/vagas)
+- [Vagas para Kotlin](https://github.com/kotlin-br/vagas)
 - [Vagas para Vue.js](https://github.com/vuejs-br/vagas)
 - [Vagas para Android](https://github.com/androiddevbr/vagas)
 - [Vagas para Flutter](https://github.com/flutter-brazil/vagas)
@@ -51,8 +52,8 @@ issue que você tem interesse.
 
 - [Vagas para no Ceará](https://github.com/CangaceirosDevels/vagas_de_emprego)
 - [Vagas para Back-end (Angola)](https://github.com/backend-ao/vagas)
-- [Vagas para Back-end (Portugal)](https://github.com/backend-pt/vagas)
 - [Vagas para Front-end (Angola)](https://github.com/frontend-ao/vagas)
+- [Vagas para Back-end (Portugal)](https://github.com/backend-pt/vagas)
 - [Vagas para Front-end (Portugal)](https://github.com/frontend-pt/vagas)
 
 ## Licença
