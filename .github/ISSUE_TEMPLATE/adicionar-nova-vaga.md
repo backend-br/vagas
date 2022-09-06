@@ -1,103 +1,58 @@
 ---
 name: Adicionar nova vaga
-about: Não esqueça de seguir todas as instruções do template antes de abrir a vaga.
-title: "[Cidade] Back-end Developer @ Nome da Empresa"
-
+about: Siga as instruções fornecidas pelo modelo de issues.
+title: '[Cidade] Back-end developer @NomeDaEmpresa'
 ---
-<!--
-==================================================
-Caso a vaga for remoto durante a pandemia informar no texto "Remoto durante o covid"
-==================================================
--->
-<!-- 
-==================================================
-POR FAVOR, SÓ POSTE SE A VAGA FOR PARA BACK-END!
-
-Não faça distinção de gênero no título da vaga.
-
-Use: "Back-End Developer" ao invés de 
-"Desenvolvedor Back-End" \o/
-
-Exemplo: `[São Paulo] Back-End Developer @ NOME DA EMPRESA`
-==================================================
--->
-<!--
-==================================================
-Caso a vaga for remoto durante a pandemia deixar a linha abaixo
-==================================================
--->
-> Vaga Remota durante a pandemia
 
 ## Nossa empresa
 
-Exemplo: Aqui na Corporação ACME somos líderes em...
+Informe a descrição da empresa.
 
 ## Descrição da vaga
 
-Exemplo: Projeto bazinga em NodeJS, etc.
+Informe a descrição da vaga.
 
 ## Local
 
-Exemplo: Remoto ou Escritório, São Paulo - Vila Olímpia
+Informe se é remoto, híbrido ou presencial.
 
 ## Requisitos
 
-**Obrigatórios:**
-- 3 anos de experiência com Node
-- 2 anos de experiência com mongodb e express
-
-**Desejáveis:**
-- conhecimentos em ruby on rails
-- conhecimentos em C#
-
-**Diferenciais:**
-- projetos opensource
+Informe os requisitos obrigatórios e desejáveis para a vaga.
 
 ## Benefícios
 
-- Plano de saúde
-- Seguro de vida
-- VR de R$ X/dia
-- Auxílio creche
-- ...
-
-**Diferenciais:**
-- 2 horas de almoço
-- monte a sua máquina como desejar
-- frigobar sempre cheio :P
-- sala de jogos
-- ...
+Informe os benefícios oferecidos pela empresa.
 
 ## Contratação
 
-PJ a combinar
+Informe o tipo de contratação, CLT, PJ ou outra.
 
 ## Como se candidatar
 
-Por favor envie um email para email@email.com.br com seu CV anexado - enviar no assunto: Vaga NodeJS
-
-## Tempo médio de feedbacks
-
-Costumamos enviar feedbacks em até XX dias após cada processo.
-E-mail para contato em caso de não haver resposta: feedbacks@empresasuperlegal.com.br
+Informe os canais disponíveis para a aplicação na vaga.
 
 ## Labels
-<!-- retire os labels que não fazem sentido à vaga -->
 
-#### Alocação
-- Alocado
-- Remoto
+<!-- retire os labels que não fazem sentido à vaga. -->
 
-#### Regime
-- CLT
-- Estágio
-- Freela
-- PJ
+### Nível
 
-#### Nível
 - Júnior
 - Pleno
 - Sênior
 - Especialista
 
+### Regime
 
+- PJ
+- CLT
+- Estágio
+- Contrato
+- Freelance
+
+### Alocação
+
+- Remoto
+- Híbrido
+- Presencial
