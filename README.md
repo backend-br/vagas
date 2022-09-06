@@ -6,12 +6,12 @@
 
 # Vagas
 
-Espaço para a divulgação de vagas para desenvolvedores back-end via issues do Github.
+Espaço para a divulgação de vagas para desenvolvedores backend via issues do Github.
 
 ## Como cadastrar uma vaga?
 
-Abra uma [issue](https://github.com/backend-br/vagas/issues/new/choose), e no título, coloque o **nome da cidade**,
-seguido da **descrição da vaga**, e **nome da empresa**. Siga o modelo padrão gerado pela issue.
+Abra uma [issue](https://github.com/backend-br/vagas/issues), e preencha os dados seguindo o modelo padrão gerado
+pela issue.
 
 Adicionalmente, informe quais labels devemos adicionar, contendo o nível de experiência desejada e a forma de contração.
 
@@ -58,7 +58,7 @@ issue que você tem interesse.
 
 ## Licença
 
-Licenciado sob [MIT](/LICENSE).
+Licenciado sob [MIT](LICENSE).
 
 ## Agradecimento
 
