@@ -1,8 +1,10 @@
 ---
 name: Adicionar nova vaga
 about: Siga as instruções fornecidas pelo modelo de issues.
-title: '[Cidade] Back-end developer @NomeDaEmpresa'
+title: '[Local] Back-end developer @NomeDaEmpresa'
 ---
+
+<!-- Por favor, poste apenas vagas para backend. -->
 
 ## Nossa empresa
 
@@ -34,10 +36,11 @@ Informe os canais disponíveis para a aplicação na vaga.
 
 ## Labels
 
-<!-- retire os labels que não fazem sentido à vaga. -->
+<!-- Retire os labels que não fazem sentido à vaga. -->
 
 ### Nível
 
+- Estagiário
 - Júnior
 - Pleno
 - Sênior
@@ -47,7 +50,6 @@ Informe os canais disponíveis para a aplicação na vaga.
 
 - PJ
 - CLT
-- Estágio
 - Contrato
 - Freelance
 
