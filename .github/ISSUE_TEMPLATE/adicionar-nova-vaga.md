@@ -1,7 +1,7 @@
 ---
 name: Adicionar nova vaga
 about: Siga as instruções fornecidas pelo modelo de issues.
-title: '[Local] Back-end developer @NomeDaEmpresa'
+title: '[Alocação] Back-end developer @NomeDaEmpresa'
 ---
 
 <!-- Por favor, poste apenas vagas para backend. -->
