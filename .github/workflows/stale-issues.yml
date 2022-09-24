@@ -10,7 +10,7 @@ jobs:
     - uses: actions/stale@v3
       with:
         repo-token: ${{ secrets.GITHUB_TOKEN }}
-        stale-issue-message: 'Esta vaga encontra-se há um bom tempo sem novas interações. Se ainda estiver aberta, faça um comentário, caso contrario, a fecharemos automaticamente em 03 dias.'
+        stale-issue-message: 'Esta vaga encontra-se há um bom tempo sem novas interações. Se ainda estiver aberta, faça um comentário, caso contrário, a fecharemos automaticamente em 02 dias.'
         days-before-stale: 30
-        days-before-close: 3
+        days-before-close: 2
         ascending: true
