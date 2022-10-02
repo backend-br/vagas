@@ -56,9 +56,17 @@ issue que você tem interesse.
 - [Vagas para Back-end (Portugal)](https://github.com/backend-pt/vagas)
 - [Vagas para Front-end (Portugal)](https://github.com/frontend-pt/vagas)
 
+<div id='license'></div>
+
 ## Licença
 
 Licenciado sob [MIT](LICENSE).
+
+<div id='contributing'></div>
+
+## Contribuindo
+
+Siga as [diretrizes de contribuição](CONTRIBUTING.md) para contribuir com o projeto.
 
 ## Agradecimento
 
