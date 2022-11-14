@@ -47,6 +47,7 @@ issue que você tem interesse.
 - [Vagas para iOS e OSX](https://github.com/CocoaHeadsBrasil/vagas)
 - [Vagas para Go/Golang](https://github.com/Gommunity/vagas)
 - [Vagas para React/React Native](https://github.com/react-brasil/vagas)
+- [Vagas para Python](https://github.com/pydevbr/vagas)
 
 ### Por localidade
 
