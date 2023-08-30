@@ -48,6 +48,7 @@ issue que você tem interesse.
 - [Vagas para Go/Golang](https://github.com/Gommunity/vagas)
 - [Vagas para React/React Native](https://github.com/react-brasil/vagas)
 - [Vagas para Python](https://github.com/pydevbr/vagas)
+- [Vagas para Node.JS](https://github.com/nodejsdevbr/vagas)
 
 ### Por localidade
 
