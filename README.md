@@ -57,6 +57,7 @@ issue que você tem interesse.
 - [Vagas para Front-end (Angola)](https://github.com/frontend-ao/vagas)
 - [Vagas para Back-end (Portugal)](https://github.com/backend-pt/vagas)
 - [Vagas para Front-end (Portugal)](https://github.com/frontend-pt/vagas)
+- [Vagas para Back-end e Frontend(Brasil)](https://github.com/rafaelsilva81/githubvagasbrasil)
 
 <div id='license'></div>
 
