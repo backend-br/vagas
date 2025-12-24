@@ -1,13 +1,18 @@
-name: 'Labeling new issue'
+name: Labeling new issue
+
 on:
   issues:
-    types: [ 'opened' ]
+    types: [ 'opened', 'edited' ]
+    permissions:
+      issues: write
 
 jobs:
   build:
+    permissions:
+      issues: write
     runs-on: ubuntu-latest
     steps:
-      - uses: Renato66/auto-label@v2
+      - uses: Renato66/auto-label@v3
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           labels-not-allowed: '["stale"]'

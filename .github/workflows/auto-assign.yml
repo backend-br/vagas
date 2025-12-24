@@ -1,0 +1,19 @@
+name: Auto assign pull requests
+
+on:
+  pull_request:
+    types:
+      - opened
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Assign pull requests
+        uses: gustavofreze/auto-assign@2.0.0
+        with:
+          assignees: '${{ vars.ASSIGNEES }}'
+          github_token: '${{ secrets.GITHUB_TOKEN }}'
+          assignment_options: 'PULL_REQUEST'
