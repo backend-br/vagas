@@ -20,6 +20,8 @@ Adicionalmente, informe quais labels devemos adicionar, contendo o nível de exp
 Você pode receber atualizações das vagas no seu e-mail ou via notificações do GitHub, basta clicar **Subscribe**, na
 issue que você tem interesse.
 
+Você também pode [pesquisar e filtrar as vagas da Backend BR no openings.dev](https://openings.dev/communities/backend-br/vagas). Cada resultado continua levando à issue original neste repositório.
+
 <p align="center">
     <img src="doc/images/subscribe.jpg" alt="subscribe."/>
     <br />
