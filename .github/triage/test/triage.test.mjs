@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { formLabels, parseForm } from '../form.mjs'
-import { comment } from '../messages.mjs'
-import { contentReasons, verdict } from '../rules.mjs'
+import { parseForm, repositoryLabelsFromForm } from '../form.mjs'
+import { buildComment } from '../messages.mjs'
+import { contentReasons, decideVerdict } from '../rules.mjs'
 import { evaluate } from '../triage.mjs'
 
 const config = {
@@ -52,16 +52,16 @@ const enBody = [
 
 test('parses the pt-BR form and maps labels', () => {
   const form = parseForm(ptBody())
-  assert.equal(form.lang, 'pt')
+  assert.equal(form.language, 'pt')
   assert.deepEqual(form.problems, [])
-  assert.deepEqual(formLabels(form.fields), ['Pleno', 'CLT', 'PJ', 'Remoto'])
+  assert.deepEqual(repositoryLabelsFromForm(form.fields), ['Pleno', 'CLT', 'PJ', 'Remoto'])
 })
 
 test('parses the en-US form and maps labels to the Portuguese ones', () => {
   const form = parseForm(enBody)
-  assert.equal(form.lang, 'en')
+  assert.equal(form.language, 'en')
   assert.deepEqual(form.problems, [])
-  assert.deepEqual(formLabels(form.fields), ['Especialista', 'Contrato', 'Híbrido'])
+  assert.deepEqual(repositoryLabelsFromForm(form.fields), ['Especialista', 'Contrato', 'Híbrido'])
 })
 
 test('rejects bodies that do not come from a form', () => {
@@ -97,12 +97,12 @@ test('soft content rules: telegram, crypto, unrelated title, emoji and hashtag w
 })
 
 test('verdict: any hard reason rejects, soft reasons send to review', () => {
-  assert.deepEqual(verdict([]), { verdict: 'verified', reasons: [] })
-  assert.deepEqual(verdict(['crypto', 'multiple']), { verdict: 'reject', reasons: ['multiple'] })
-  assert.deepEqual(verdict(['crypto', 'crypto']), { verdict: 'review', reasons: ['crypto'] })
+  assert.deepEqual(decideVerdict([]), { verdict: 'verified', reasons: [] })
+  assert.deepEqual(decideVerdict(['crypto', 'multiple']), { verdict: 'reject', reasons: ['multiple'] })
+  assert.deepEqual(decideVerdict(['crypto', 'crypto']), { verdict: 'review', reasons: ['crypto'] })
 })
 
-function deps(overrides = {}) {
+function fakeGithubLookups(overrides = {}) {
   return {
     authorIssues: async () => [],
     verifiedCount: async () => 0,
@@ -110,38 +110,44 @@ function deps(overrides = {}) {
   }
 }
 
-const issue = { title: '[Remoto] Back-end Pleno - Empresa', body: ptBody(), created_at: '2026-10-20T12:00:00Z' }
+const issue = { title: '[Remoto] Back-end Pleno - Empresa', body: ptBody(), created_at: '2026-10-22T12:00:00Z' }
 
 test('evaluate: clean post is verified', async () => {
-  assert.equal((await evaluate(issue, deps())).verdict, 'verified')
+  assert.equal((await evaluate(issue, fakeGithubLookups())).verdict, 'verified')
 })
 
 test('evaluate: hard rule failures skip the author lookups', async () => {
-  const result = await evaluate({ ...issue, body: 'texto solto' }, deps({ verifiedCount: async () => assert.fail('lookup called') }))
+  const result = await evaluate({ ...issue, body: 'texto solto' }, fakeGithubLookups({ verifiedCount: async () => assert.fail('lookup called') }))
   assert.deepEqual(result.reasons, ['form'])
+})
+
+test('evaluate: issues created before the forms existed skip the form check', async () => {
+  const legacy = { ...issue, body: '## Nossa empresa\n\nFintech.', created_at: '2026-10-01T12:00:00Z' }
+  assert.equal((await evaluate(legacy, fakeGithubLookups())).verdict, 'verified')
+  assert.deepEqual((await evaluate({ ...legacy, body: 'https://micro1.ai/job' }, fakeGithubLookups())).reasons, ['ai_training'])
 })
 
 test('evaluate: rate limit counts issues inside the window ending at creation', async () => {
   const at = (day) => ({ created_at: `2026-10-${day}T10:00:00Z` })
-  const many = [14, 15, 16, 17, 18, 19, 19, 20, 20].map(at)
-  assert.deepEqual((await evaluate(issue, deps({ authorIssues: async () => many }))).reasons, ['rate_limit'])
-  assert.equal((await evaluate(issue, deps({ authorIssues: async () => many.slice(1) }))).verdict, 'verified')
+  const many = [16, 17, 18, 19, 20, 21, 21, 22, 22].map(at)
+  assert.deepEqual((await evaluate(issue, fakeGithubLookups({ authorIssues: async () => many }))).reasons, ['rate_limit'])
+  assert.equal((await evaluate(issue, fakeGithubLookups({ authorIssues: async () => many.slice(1) }))).verdict, 'verified')
 })
 
 test('evaluate: trusted authors skip soft checks but not hard ones', async () => {
-  const trusted = deps({ verifiedCount: async () => 3 })
+  const trusted = fakeGithubLookups({ verifiedCount: async () => 3 })
   assert.equal((await evaluate({ ...issue, title: '[Remoto] Dev Web3 Backend' }, trusted)).verdict, 'verified')
   assert.deepEqual((await evaluate({ ...issue, body: `${issue.body}\nhttps://micro1.ai` }, trusted)).reasons, ['ai_training'])
 })
 
 test('evaluate: soft reasons send to review', async () => {
-  assert.deepEqual((await evaluate({ ...issue, title: '[Remoto] Analista de Marketing' }, deps())).reasons, ['not_backend'])
+  assert.deepEqual((await evaluate({ ...issue, title: '[Remoto] Analista de Marketing' }, fakeGithubLookups())).reasons, ['not_backend'])
 })
 
 test('comment is bilingual when the language is unknown', () => {
-  const text = comment(null, { verdict: 'reject', reasons: ['form', 'rate_limit'] }, 'backend-br/vagas', { maxIssues: 8, days: 7 })
+  const text = buildComment(null, { verdict: 'reject', reasons: ['form', 'rate_limit'] }, 'backend-br/vagas', { maxIssues: 8, days: 7 })
   assert.match(text, /fechada automaticamente/)
   assert.match(text, /closed automatically/)
   assert.match(text, /8 vagas a cada 7 dias/)
-  assert.doesNotMatch(comment('en', { verdict: 'review', reasons: ['crypto'] }, 'r', {}), /triagem\./)
+  assert.doesNotMatch(buildComment('en', { verdict: 'review', reasons: ['crypto'] }, 'r', {}), /triagem\./)
 })

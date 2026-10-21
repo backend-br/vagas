@@ -1,33 +1,42 @@
-// Entry point of .github/workflows/triage.yml: evaluates a job issue and applies the verdict.
-import { readFileSync } from 'node:fs'
+import { appendFileSync, readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
-import { formLabels, parseForm } from './form.mjs'
-import { MARKER, comment } from './messages.mjs'
-import { HARD, contentReasons, verdict } from './rules.mjs'
+import { parseForm, repositoryLabelsFromForm } from './form.mjs'
+import { COMMENT_MARKER, buildComment } from './messages.mjs'
+import { REJECTION_REASONS, contentReasons, decideVerdict } from './rules.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
-const DAY = 24 * 60 * 60 * 1000
+const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
+const PAGE_SIZE = 100
 
-// deps isolates every network call so the evaluation can be tested and backtested offline.
-export async function evaluate(issue, deps) {
-  const form = parseForm(issue.body)
-  let reasons = [...form.problems, ...contentReasons(issue.title, issue.body, config)]
-
-  const createdAt = new Date(issue.created_at).getTime()
-  const recent = (await deps.authorIssues()).filter((other) => {
-    const time = new Date(other.created_at).getTime()
-    return time <= createdAt && time > createdAt - config.rateLimit.days * DAY
-  })
-  if (recent.length > config.rateLimit.maxIssues) reasons.push('rate_limit')
-
-  if (verdict(reasons).verdict !== 'reject') {
-    // Authors with approved history skip the soft checks; hard rules still apply to everyone.
-    if ((await deps.verifiedCount()) >= config.trustedAuthorMinVerified) reasons = reasons.filter((reason) => HARD.has(reason))
-  }
-  return { lang: form.lang, form, ...verdict(reasons) }
+function isAfterFormsWereCreated(createdAt) {
+  return createdAt >= new Date(config.formsSince).getTime()
 }
 
-async function github(method, path, body) {
+function issuesInsideRateLimitWindow(authorIssues, createdAt) {
+  const windowStart = createdAt - config.rateLimit.days * MILLISECONDS_PER_DAY
+  return authorIssues.filter((authorIssue) => {
+    const authorIssueCreatedAt = new Date(authorIssue.created_at).getTime()
+    return authorIssueCreatedAt <= createdAt && authorIssueCreatedAt > windowStart
+  })
+}
+
+export async function evaluate(issue, githubLookups) {
+  const form = parseForm(issue.body)
+  const createdAt = new Date(issue.created_at).getTime()
+  const formReasons = isAfterFormsWereCreated(createdAt) ? form.problems : []
+  let reasons = [...formReasons, ...contentReasons(issue.title, issue.body, config)]
+
+  const recentAuthorIssues = issuesInsideRateLimitWindow(await githubLookups.authorIssues(), createdAt)
+  if (recentAuthorIssues.length > config.rateLimit.maxIssues) reasons.push('rate_limit')
+
+  if (decideVerdict(reasons).verdict !== 'reject') {
+    const isTrustedAuthor = (await githubLookups.verifiedCount()) >= config.trustedAuthorMinVerified
+    if (isTrustedAuthor) reasons = reasons.filter((reason) => REJECTION_REASONS.has(reason))
+  }
+  return { language: form.language, form, ...decideVerdict(reasons) }
+}
+
+async function githubRequest(method, path, body) {
   const response = await fetch(`https://api.github.com${path}`, {
     method,
     headers: {
@@ -41,52 +50,133 @@ async function github(method, path, body) {
   return response.status === 204 ? null : response.json()
 }
 
+function triageLabelNames() {
+  const { verified, review, rejected } = config.labels
+  return [verified, review, rejected]
+}
+
+function labelNamesOf(issue) {
+  return issue.labels.map((label) => label.name)
+}
+
+function skipReason(issue, action) {
+  const labelNames = labelNamesOf(issue)
+  const wasNeverTriaged = !triageLabelNames().some((name) => labelNames.includes(name))
+  if (issue.pull_request) return 'pull request'
+  if (labelNames.includes(config.labels.override)) return 'maintainer override label'
+  if (config.skipAssociations.includes(issue.author_association)) return 'posted by a maintainer'
+  if (action === 'edited' && wasNeverTriaged) return 'edited issue that was never triaged'
+  return null
+}
+
+function githubLookupsFor(issue, repo) {
+  const author = issue.user.login
+  const issuesPath = `/repos/${repo}/issues`
+  return {
+    authorIssues: async () => {
+      const rateLimitWindowStart = new Date(new Date(issue.created_at).getTime() - (config.rateLimit.days + 1) * MILLISECONDS_PER_DAY)
+      const authorIssues = await githubRequest('GET', `${issuesPath}?creator=${author}&state=all&since=${rateLimitWindowStart.toISOString()}&per_page=${PAGE_SIZE}`)
+      return authorIssues.filter((authorIssue) => !authorIssue.pull_request)
+    },
+    verifiedCount: async () => {
+      const verifiedLabel = encodeURIComponent(config.labels.verified)
+      const verifiedIssues = await githubRequest('GET', `${issuesPath}?creator=${author}&state=all&labels=${verifiedLabel}&per_page=${PAGE_SIZE}`)
+      return verifiedIssues.filter((verifiedIssue) => verifiedIssue.number !== issue.number).length
+    },
+  }
+}
+
+async function applyLabels(issue, issuePath, result) {
+  const { verified, review, rejected } = config.labels
+  const verdictLabel = { verified, review, reject: rejected }[result.verdict]
+  const outdatedTriageLabels = labelNamesOf(issue).filter((name) => triageLabelNames().includes(name) && name !== verdictLabel)
+  for (const name of outdatedTriageLabels) {
+    await githubRequest('DELETE', `${issuePath}/labels/${encodeURIComponent(name)}`)
+  }
+  const formLabels = result.verdict === 'reject' ? [] : repositoryLabelsFromForm(result.form.fields)
+  await githubRequest('POST', `${issuePath}/labels`, { labels: [verdictLabel, ...formLabels] })
+}
+
+async function upsertTriageComment(repo, issuePath, result) {
+  const comments = await githubRequest('GET', `${issuePath}/comments?per_page=${PAGE_SIZE}`)
+  const previousTriageComment = comments.find((comment) => comment.user.type === 'Bot' && comment.body.startsWith(COMMENT_MARKER))
+  const body = buildComment(result.language, result, repo, config.rateLimit)
+  if (previousTriageComment) await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousTriageComment.id}`, { body })
+  else if (result.verdict !== 'verified') await githubRequest('POST', `${issuePath}/comments`, { body })
+}
+
+async function applyState(issue, issuePath, result) {
+  const wasRejectedByTriage = labelNamesOf(issue).includes(config.labels.rejected)
+  if (result.verdict === 'reject' && issue.state === 'open') {
+    await githubRequest('PATCH', issuePath, { state: 'closed', state_reason: 'not_planned' })
+  } else if (result.verdict !== 'reject' && issue.state === 'closed' && wasRejectedByTriage) {
+    await githubRequest('PATCH', issuePath, { state: 'open' })
+  }
+}
+
+async function triageIssue(issue, repo, isDryRun) {
+  const result = await evaluate(issue, githubLookupsFor(issue, repo))
+  console.log(`#${issue.number}: ${result.verdict} ${result.reasons.join(', ')}`)
+  if (isDryRun) return result
+
+  const issuePath = `/repos/${repo}/issues/${issue.number}`
+  await applyLabels(issue, issuePath, result)
+  await upsertTriageComment(repo, issuePath, result)
+  await applyState(issue, issuePath, result)
+  return result
+}
+
+async function listOpenIssues(repo) {
+  const openIssues = []
+  for (let page = 1; ; page++) {
+    const pageIssues = await githubRequest('GET', `/repos/${repo}/issues?state=open&per_page=${PAGE_SIZE}&page=${page}`)
+    openIssues.push(...pageIssues)
+    if (pageIssues.length < PAGE_SIZE) return openIssues
+  }
+}
+
+function writeJobSummary(rows, isDryRun) {
+  const escapeTableCell = (text) => text.replace(/\|/g, '\\|')
+  const lines = [
+    `### Job triage${isDryRun ? ' (dry run, nothing changed)' : ''}`,
+    '',
+    '| Issue | Verdict | Reasons | Title |',
+    '| --- | --- | --- | --- |',
+    ...rows.map(({ issue, verdict, reasons }) => `| #${issue.number} | ${verdict} | ${reasons.join(', ')} | ${escapeTableCell(issue.title)} |`),
+  ]
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
+}
+
+async function triageFromIssueEvent(event, repo) {
+  const reason = skipReason(event.issue, event.action)
+  if (reason) return console.log(`Skipped: ${reason}.`)
+  return triageIssue(event.issue, repo, false)
+}
+
+async function triageFromManualRun(inputs, repo) {
+  const isDryRun = inputs['dry-run'] !== 'false' && inputs['dry-run'] !== false
+  const issues = inputs.issue
+    ? [await githubRequest('GET', `/repos/${repo}/issues/${Number(inputs.issue)}`)]
+    : await listOpenIssues(repo)
+  const rows = []
+  for (const issue of issues) {
+    if (issue.pull_request) continue
+    const reason = skipReason(issue, 'manual')
+    if (reason) {
+      console.log(`#${issue.number}: skipped, ${reason}.`)
+      rows.push({ issue, verdict: 'skipped', reasons: [reason] })
+      continue
+    }
+    rows.push({ issue, ...(await triageIssue(issue, repo, isDryRun)) })
+  }
+  writeJobSummary(rows, isDryRun)
+}
+
 async function main() {
   const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH))
   const repo = process.env.GITHUB_REPOSITORY
-  const { action, issue } = event
-  const { labels: names } = config
-  const current = issue.labels.map((label) => label.name)
-  const triageLabels = [names.verified, names.review, names.rejected]
-
-  if (current.includes(names.override)) return console.log('Skipped: maintainer override label.')
-  if (config.skipAssociations.includes(issue.author_association)) return console.log('Skipped: posted by a maintainer.')
-  // Issues created before the triage existed are only evaluated when opened, never on edit.
-  if (action === 'edited' && !current.some((name) => triageLabels.includes(name))) return console.log('Skipped: issue never triaged.')
-
-  const author = issue.user.login
-  const base = `/repos/${repo}/issues`
-  const result = await evaluate(issue, {
-    authorIssues: async () => {
-      const since = new Date(Date.now() - (config.rateLimit.days + 1) * DAY).toISOString()
-      const list = await github('GET', `${base}?creator=${author}&state=all&since=${since}&per_page=100`)
-      return list.filter((item) => !item.pull_request)
-    },
-    verifiedCount: async () => {
-      const list = await github('GET', `${base}?creator=${author}&state=all&labels=${encodeURIComponent(names.verified)}&per_page=100`)
-      return list.filter((item) => item.number !== issue.number).length
-    },
-  })
-  console.log(`#${issue.number}: ${result.verdict} ${result.reasons.join(', ')}`)
-
-  const target = { verified: names.verified, review: names.review, reject: names.rejected }[result.verdict]
-  for (const name of current.filter((name) => triageLabels.includes(name) && name !== target)) {
-    await github('DELETE', `${base}/${issue.number}/labels/${encodeURIComponent(name)}`)
-  }
-  const add = [target, ...(result.verdict === 'reject' ? [] : formLabels(result.form.fields))]
-  await github('POST', `${base}/${issue.number}/labels`, { labels: add })
-
-  const comments = await github('GET', `${base}/${issue.number}/comments?per_page=100`)
-  const previous = comments.find((item) => item.user.type === 'Bot' && item.body.startsWith(MARKER))
-  const text = comment(result.lang, result, repo, config.rateLimit)
-  if (previous) await github('PATCH', `/repos/${repo}/issues/comments/${previous.id}`, { body: text })
-  else if (result.verdict !== 'verified') await github('POST', `${base}/${issue.number}/comments`, { body: text })
-
-  if (result.verdict === 'reject' && issue.state === 'open') {
-    await github('PATCH', `${base}/${issue.number}`, { state: 'closed', state_reason: 'not_planned' })
-  } else if (result.verdict !== 'reject' && issue.state === 'closed' && current.includes(names.rejected)) {
-    await github('PATCH', `${base}/${issue.number}`, { state: 'open' })
-  }
+  if (process.env.GITHUB_EVENT_NAME === 'workflow_dispatch') return triageFromManualRun(event.inputs, repo)
+  return triageFromIssueEvent(event, repo)
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
