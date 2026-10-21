@@ -1,0 +1,104 @@
+name: 🇧🇷 Nova vaga (pt-BR)
+description: Divulgue uma vaga para pessoas desenvolvedoras backend.
+title: "[Remoto] Desenvolvedor(a) Back-end Pleno - NomeDaEmpresa"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Uma vaga por issue, apenas para backend (ou fullstack com foco em backend).
+        Vagas de treinamento de IA, anotação de dados, listas com várias vagas e anúncios incompletos são fechados automaticamente.
+        Se sua vaga for fechada, edite a issue corrigindo o que foi apontado e ela será reavaliada.
+  - type: textarea
+    id: company
+    attributes:
+      label: Sobre a empresa
+      description: O que a empresa faz e em qual produto/time a pessoa vai trabalhar.
+    validations:
+      required: true
+  - type: input
+    id: company-url
+    attributes:
+      label: Site da empresa
+      placeholder: https://empresa.com.br
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Descrição da vaga
+      description: Responsabilidades e o dia a dia da posição.
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requisitos
+      description: Separe obrigatórios e desejáveis.
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefícios
+  - type: input
+    id: salary
+    attributes:
+      label: Faixa salarial
+      placeholder: R$ 8.000 a R$ 12.000
+  - type: dropdown
+    id: level
+    attributes:
+      label: Nível
+      options:
+        - Estagiário
+        - Júnior
+        - Pleno
+        - Sênior
+        - Especialista
+    validations:
+      required: true
+  - type: dropdown
+    id: contract
+    attributes:
+      label: Regime de contratação
+      multiple: true
+      options:
+        - CLT
+        - PJ
+        - Contrato
+        - Freelance
+    validations:
+      required: true
+  - type: dropdown
+    id: work-model
+    attributes:
+      label: Modelo de trabalho
+      options:
+        - Remoto
+        - Híbrido
+        - Presencial
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Localização
+      description: Cidade/estado, se híbrido ou presencial.
+  - type: textarea
+    id: apply
+    attributes:
+      label: Como se candidatar
+      description: Link ou e-mail para candidatura.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmações
+      options:
+        - label: Esta issue contém uma única vaga.
+          required: true
+        - label: A vaga é para backend (ou fullstack com foco em backend).
+          required: true
+        - label: Não é vaga de treinamento de IA, anotação de dados ou avaliação de modelos.
+          required: true

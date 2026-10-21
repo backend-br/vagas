@@ -1,0 +1,27 @@
+name: Triagem de vagas
+
+on:
+  issues:
+    types: [ 'opened', 'edited' ]
+
+concurrency:
+  group: triage-${{ github.event.issue.number }}
+
+jobs:
+  triage:
+    if: ${{ !github.event.issue.pull_request }}
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/triage
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Triage issue
+        run: node .github/triage/triage.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,104 @@
+name: 🇺🇸 New job (en-US)
+description: Post a job opening for backend developers.
+title: "[Remote] Backend Developer Mid-level - CompanyName"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        One job per issue, backend only (or fullstack with a backend focus).
+        AI training, data annotation, multi-job lists and incomplete posts are closed automatically.
+        If your post is closed, edit the issue fixing what was pointed out and it will be re-evaluated.
+  - type: textarea
+    id: company
+    attributes:
+      label: About the company
+      description: What the company does and which product/team the hire will join.
+    validations:
+      required: true
+  - type: input
+    id: company-url
+    attributes:
+      label: Company website
+      placeholder: https://company.com
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Job description
+      description: Responsibilities and day-to-day work.
+    validations:
+      required: true
+  - type: textarea
+    id: requirements
+    attributes:
+      label: Requirements
+      description: Separate required and nice-to-have.
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: Benefits
+  - type: input
+    id: salary
+    attributes:
+      label: Salary range
+      placeholder: USD 4,000 to USD 6,000 / month
+  - type: dropdown
+    id: level
+    attributes:
+      label: Level
+      options:
+        - Intern
+        - Junior
+        - Mid-level
+        - Senior
+        - Staff/Principal
+    validations:
+      required: true
+  - type: dropdown
+    id: contract
+    attributes:
+      label: Contract type
+      multiple: true
+      options:
+        - CLT
+        - PJ
+        - Contractor
+        - Freelance
+    validations:
+      required: true
+  - type: dropdown
+    id: work-model
+    attributes:
+      label: Work model
+      options:
+        - Remote
+        - Hybrid
+        - On-site
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: City/country, if hybrid or on-site.
+  - type: textarea
+    id: apply
+    attributes:
+      label: How to apply
+      description: Link or e-mail to apply.
+    validations:
+      required: true
+  - type: checkboxes
+    id: confirmations
+    attributes:
+      label: Confirmations
+      options:
+        - label: This issue contains a single job opening.
+          required: true
+        - label: The job is backend (or fullstack with a backend focus).
+          required: true
+        - label: This is not an AI training, data annotation or model evaluation gig.
+          required: true

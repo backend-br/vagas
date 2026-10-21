@@ -10,10 +10,30 @@ Espaço para a divulgação de vagas para desenvolvedores backend via issues do 
 
 ## Como cadastrar uma vaga?
 
-Abra uma [issue](https://github.com/backend-br/vagas/issues), e preencha os dados seguindo o modelo padrão gerado
-pela issue.
+Abra uma [issue](https://github.com/backend-br/vagas/issues/new/choose) usando o formulário em português ou em
+inglês. Os labels de nível, regime e modelo de trabalho são aplicados a partir do formulário.
 
-Adicionalmente, informe quais labels devemos adicionar, contendo o nível de experiência desejada e a forma de contração.
+Toda vaga nova passa por uma triagem automática:
+
+- Uma vaga por issue, apenas para backend (ou fullstack com foco em backend).
+- Vagas de treinamento de IA, anotação de dados ou avaliação de modelos não são aceitas.
+- Cada autor pode publicar até 8 vagas a cada 7 dias.
+- Vagas aprovadas recebem o label `verificada`. Vagas com dúvida recebem `em-triagem` e são revisadas por uma pessoa
+  mantenedora. Vagas recusadas são fechadas com um comentário explicando o motivo; basta editar a issue para ela ser
+  reavaliada.
+
+Para ver apenas vagas aprovadas, use o filtro
+[`label:verificada`](https://github.com/backend-br/vagas/issues?q=is%3Aissue+is%3Aopen+label%3Averificada).
+
+Para mantenedores: revise as vagas em
+[`label:em-triagem`](https://github.com/backend-br/vagas/issues?q=is%3Aissue+is%3Aopen+label%3Aem-triagem). Para
+aprovar, troque `em-triagem` por `verificada`; autores com 3 vagas verificadas passam a ir direto para `verificada`. Para
+que a triagem nunca mais altere uma issue, adicione `revisada`. As regras ficam em `.github/triage/config.json`.
+
+### Posting a job in English
+
+Open an [issue](https://github.com/backend-br/vagas/issues/new/choose) with the English form. Posts go through the same
+automatic triage: one backend job per issue, no AI training gigs, up to 8 posts per author every 7 days.
 
 ## Como receber atualizações das vagas?
 
