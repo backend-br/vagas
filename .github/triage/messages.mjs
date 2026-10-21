@@ -1,13 +1,13 @@
-export const MARKER = '<!-- triagem-vagas -->'
+export const COMMENT_MARKER = '<!-- job-triage -->'
 
-const FORMS_URL = (repo) => `https://github.com/${repo}/issues/new/choose`
+const newIssueFormsUrl = (repo) => `https://github.com/${repo}/issues/new/choose`
 
-const TEXT = {
+const TEXT_BY_LANGUAGE = {
   pt: {
     reject: 'Esta vaga foi fechada automaticamente pela triagem.',
     review: 'Esta vaga está em triagem e será revisada por uma pessoa mantenedora.',
     verified: 'Esta vaga foi revisada e aprovada pela triagem.',
-    fix: (repo) => `Edite a issue corrigindo os pontos abaixo e ela será reavaliada automaticamente. Para uma vaga nova, use um dos [formulários](${FORMS_URL(repo)}).`,
+    fix: (repo) => `Edite a issue corrigindo os pontos abaixo e ela será reavaliada automaticamente. Para uma vaga nova, use um dos [formulários](${newIssueFormsUrl(repo)}).`,
     mistake: 'Se achar que foi um engano, comente aqui.',
     reasons: {
       form: 'O formulário não foi usado ou está incompleto (campos obrigatórios, descrição curta ou confirmações desmarcadas).',
@@ -24,7 +24,7 @@ const TEXT = {
     reject: 'This job post was closed automatically by triage.',
     review: 'This job post is under triage and will be reviewed by a maintainer.',
     verified: 'This job post was reviewed and approved by triage.',
-    fix: (repo) => `Edit the issue fixing the points below and it will be re-evaluated automatically. For a new job, use one of the [forms](${FORMS_URL(repo)}).`,
+    fix: (repo) => `Edit the issue fixing the points below and it will be re-evaluated automatically. For a new job, use one of the [forms](${newIssueFormsUrl(repo)}).`,
     mistake: 'If you think this is a mistake, leave a comment.',
     reasons: {
       form: 'The form was not used or is incomplete (required fields, short description or unchecked confirmations).',
@@ -39,23 +39,22 @@ const TEXT = {
   },
 }
 
-function section(lang, { verdict, reasons }, repo, rateLimit) {
-  const text = TEXT[lang]
+function buildSection(language, { verdict, reasons }, repo, rateLimit) {
+  const text = TEXT_BY_LANGUAGE[language]
   const lines = [text[verdict]]
   if (verdict === 'reject') lines.push('', text.fix(repo))
   if (verdict !== 'verified') {
     lines.push('')
     for (const reason of reasons) {
-      const entry = text.reasons[reason]
-      lines.push(`- ${typeof entry === 'function' ? entry(rateLimit) : entry}`)
+      const reasonText = text.reasons[reason]
+      lines.push(`- ${typeof reasonText === 'function' ? reasonText(rateLimit) : reasonText}`)
     }
   }
   if (verdict === 'reject') lines.push('', text.mistake)
   return lines.join('\n')
 }
 
-// Unknown language means the form was not used, so both languages are shown.
-export function comment(lang, result, repo, rateLimit) {
-  const langs = lang ? [lang] : ['pt', 'en']
-  return [MARKER, ...langs.map((code) => section(code, result, repo, rateLimit))].join('\n\n')
+export function buildComment(formLanguage, result, repo, rateLimit) {
+  const languagesToShow = formLanguage ? [formLanguage] : ['pt', 'en']
+  return [COMMENT_MARKER, ...languagesToShow.map((language) => buildSection(language, result, repo, rateLimit))].join('\n\n')
 }

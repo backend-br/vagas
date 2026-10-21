@@ -1,11 +1,22 @@
-name: Triagem de vagas
+name: Job triage
 
 on:
   issues:
     types: [ 'opened', 'edited' ]
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue number. Leave empty to triage every open issue.'
+        required: false
+        type: string
+      dry-run:
+        description: 'Only report the verdicts, without changing labels, comments or state.'
+        required: false
+        type: boolean
+        default: true
 
 concurrency:
-  group: triage-${{ github.event.issue.number }}
+  group: triage-${{ github.event.issue.number || 'manual' }}
 
 jobs:
   triage:
@@ -21,7 +32,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Triage issue
+      - name: Triage issues
         run: node .github/triage/triage.mjs
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

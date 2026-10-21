@@ -1,7 +1,4 @@
-// Parses the body GitHub renders from the issue forms in .github/ISSUE_TEMPLATE.
-// Keys must match the field labels of vaga-pt-br.yml and job-en-us.yml.
-
-export const FORMS = {
+export const FIELD_LABELS_BY_LANGUAGE = {
   pt: {
     company: 'Sobre a empresa',
     companyUrl: 'Site da empresa',
@@ -32,10 +29,9 @@ export const FORMS = {
   },
 }
 
-export const REQUIRED = ['company', 'companyUrl', 'description', 'requirements', 'level', 'contract', 'workModel', 'apply']
+export const REQUIRED_FIELDS = ['company', 'companyUrl', 'description', 'requirements', 'level', 'contract', 'workModel', 'apply']
 
-// Dropdown values mapped to the labels that already exist in the repository.
-const LABELS = {
+const REPOSITORY_LABEL_BY_DROPDOWN_VALUE = {
   Estagiário: 'Estagiário', Intern: 'Estagiário',
   Júnior: 'Júnior', Junior: 'Júnior',
   Pleno: 'Pleno', 'Mid-level': 'Pleno',
@@ -47,49 +43,50 @@ const LABELS = {
   Presencial: 'Presencial', 'On-site': 'Presencial',
 }
 
-const MIN_DESCRIPTION = 80
+const MIN_DESCRIPTION_LENGTH = 80
 
-function sections(body) {
-  const result = {}
-  const parts = (body ?? '').replace(/\r\n/g, '\n').split(/^###\s+/m).slice(1)
-  for (const part of parts) {
-    const newline = part.indexOf('\n')
-    const heading = (newline === -1 ? part : part.slice(0, newline)).trim()
-    const value = newline === -1 ? '' : part.slice(newline + 1).trim()
-    result[heading] = value === '_No response_' ? '' : value
+function valuesByHeading(body) {
+  const valueByHeading = {}
+  const sections = (body ?? '').replace(/\r\n/g, '\n').split(/^###\s+/m).slice(1)
+  for (const section of sections) {
+    const headingEnd = section.indexOf('\n')
+    const heading = (headingEnd === -1 ? section : section.slice(0, headingEnd)).trim()
+    const value = headingEnd === -1 ? '' : section.slice(headingEnd + 1).trim()
+    valueByHeading[heading] = value === '_No response_' ? '' : value
   }
-  return result
+  return valueByHeading
+}
+
+function bestMatchingForm(valueByHeading) {
+  let bestMatch = null
+  for (const [language, fieldLabels] of Object.entries(FIELD_LABELS_BY_LANGUAGE)) {
+    const fields = {}
+    for (const [field, label] of Object.entries(fieldLabels)) {
+      if (label in valueByHeading) fields[field] = valueByHeading[label]
+    }
+    const matchedFieldCount = Object.keys(fields).length
+    if (!bestMatch || matchedFieldCount > bestMatch.matchedFieldCount) bestMatch = { language, fields, matchedFieldCount }
+  }
+  return bestMatch
+}
+
+function isFormComplete(fields) {
+  const hasAllRequiredFields = REQUIRED_FIELDS.every((field) => fields[field])
+  const hasDetailedDescription = (fields.description ?? '').length >= MIN_DESCRIPTION_LENGTH
+  const hasAllConfirmationsChecked = !/- \[ \]/.test(fields.confirmations ?? '- [ ]')
+  return hasAllRequiredFields && hasDetailedDescription && hasAllConfirmationsChecked
 }
 
 export function parseForm(body) {
-  const found = sections(body)
-  let best = null
-  for (const [lang, labels] of Object.entries(FORMS)) {
-    const fields = {}
-    let matched = 0
-    for (const [key, label] of Object.entries(labels)) {
-      if (label in found) {
-        fields[key] = found[label]
-        matched++
-      }
-    }
-    if (!best || matched > best.matched) best = { lang, fields, matched }
-  }
-  if (!best || best.matched < REQUIRED.length / 2) return { lang: null, fields: {}, problems: ['form'] }
-
-  const { lang, fields } = best
-  const problems = []
-  const missing = REQUIRED.filter((key) => !fields[key])
-  if (missing.length) problems.push('form')
-  else if (fields.description.length < MIN_DESCRIPTION) problems.push('form')
-  if (/- \[ \]/.test(fields.confirmations ?? '- [ ]')) problems.push('form')
-
-  return { lang, fields, problems: [...new Set(problems)] }
+  const bestMatch = bestMatchingForm(valuesByHeading(body))
+  if (bestMatch.matchedFieldCount < REQUIRED_FIELDS.length / 2) return { language: null, fields: {}, problems: ['form'] }
+  const { language, fields } = bestMatch
+  return { language, fields, problems: isFormComplete(fields) ? [] : ['form'] }
 }
 
-export function formLabels(fields) {
+export function repositoryLabelsFromForm(fields) {
   return [fields.level, fields.contract, fields.workModel]
     .flatMap((value) => (value ?? '').split(','))
-    .map((value) => LABELS[value.trim()])
+    .map((value) => REPOSITORY_LABEL_BY_DROPDOWN_VALUE[value.trim()])
     .filter(Boolean)
 }
