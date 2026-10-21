@@ -116,7 +116,7 @@ async function applyState(issue, issuePath, result) {
 
 async function triageIssue(issue, repo, isDryRun) {
   const result = await evaluate(issue, githubLookupsFor(issue, repo))
-  console.log(`#${issue.number}: ${result.verdict} ${result.reasons.join(', ')}`)
+  console.log(formatLogLine(issue, result))
   if (isDryRun) return result
 
   const issuePath = `/repos/${repo}/issues/${issue.number}`
@@ -135,26 +135,44 @@ async function listOpenIssues(repo) {
   }
 }
 
-function writeJobSummary(rows, isDryRun) {
+function formatLogLine(issue, { verdict, reasons }) {
+  return reasons.length ? `#${issue.number}: ${verdict} (${reasons.join(', ')})` : `#${issue.number}: ${verdict}`
+}
+
+function formatTotals(rows) {
+  const countByVerdict = {}
+  for (const { verdict } of rows) countByVerdict[verdict] = (countByVerdict[verdict] ?? 0) + 1
+  const totals = ['verified', 'review', 'reject', 'skipped'].map((verdict) => `${countByVerdict[verdict] ?? 0} ${verdict}`)
+  return `Totals: ${totals.join(', ')}.`
+}
+
+function writeJobSummary(rows, repo, isDryRun) {
   const escapeTableCell = (text) => text.replace(/\|/g, '\\|')
+  const issueLink = (issue) => `[#${issue.number}](https://github.com/${repo}/issues/${issue.number})`
   const lines = [
     `### Job triage${isDryRun ? ' (dry run, nothing changed)' : ''}`,
     '',
+    formatTotals(rows),
+    '',
     '| Issue | Verdict | Reasons | Title |',
     '| --- | --- | --- | --- |',
-    ...rows.map(({ issue, verdict, reasons }) => `| #${issue.number} | ${verdict} | ${reasons.join(', ')} | ${escapeTableCell(issue.title)} |`),
+    ...rows.map(({ issue, verdict, reasons }) => `| ${issueLink(issue)} | ${verdict} | ${reasons.join(', ')} | ${escapeTableCell(issue.title)} |`),
   ]
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
 }
 
 async function triageFromIssueEvent(event, repo) {
   const reason = skipReason(event.issue, event.action)
-  if (reason) return console.log(`Skipped: ${reason}.`)
-  return triageIssue(event.issue, repo, false)
+  const row = reason
+    ? { issue: event.issue, verdict: 'skipped', reasons: [reason] }
+    : { issue: event.issue, ...(await triageIssue(event.issue, repo, false)) }
+  if (reason) console.log(formatLogLine(event.issue, row))
+  writeJobSummary([row], repo, false)
 }
 
 async function triageFromManualRun(inputs, repo) {
   const isDryRun = inputs['dry-run'] !== 'false' && inputs['dry-run'] !== false
+  if (isDryRun) console.log('Dry run: labels, comments and states will not change.')
   const issues = inputs.issue
     ? [await githubRequest('GET', `/repos/${repo}/issues/${Number(inputs.issue)}`)]
     : await listOpenIssues(repo)
@@ -163,13 +181,15 @@ async function triageFromManualRun(inputs, repo) {
     if (issue.pull_request) continue
     const reason = skipReason(issue, 'manual')
     if (reason) {
-      console.log(`#${issue.number}: skipped, ${reason}.`)
-      rows.push({ issue, verdict: 'skipped', reasons: [reason] })
+      const skippedRow = { issue, verdict: 'skipped', reasons: [reason] }
+      console.log(formatLogLine(issue, skippedRow))
+      rows.push(skippedRow)
       continue
     }
     rows.push({ issue, ...(await triageIssue(issue, repo, isDryRun)) })
   }
-  writeJobSummary(rows, isDryRun)
+  console.log(formatTotals(rows))
+  writeJobSummary(rows, repo, isDryRun)
 }
 
 async function main() {
