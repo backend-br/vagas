@@ -27,6 +27,6 @@ Para iniciar o desenvolvimento, você precisará seguir alguns passos:
 
 - Fork este repositório.
 - Faça um clone do repositório que você fez seu fork.
-- Crie uma branch a partir da branch `master`.
+- Crie uma branch a partir da branch `main`.
 - Adicione sua contribuição, faça o commit e push.
 - Abra um [pull request](https://github.com/backend-br/vagas/pulls).
