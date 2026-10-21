@@ -24,14 +24,12 @@ jobs:
     permissions:
       contents: read
       issues: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           sparse-checkout: .github/triage
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
+          persist-credentials: false
       - name: Triage issues
         run: node .github/triage/triage.mjs
         env:

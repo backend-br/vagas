@@ -10,7 +10,7 @@ jobs:
   build:
     permissions:
       issues: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: Renato66/auto-label@v3
         with:

@@ -7,8 +7,9 @@ on:
 jobs:
   stale:
     permissions:
+      actions: write
       issues: write
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - uses: actions/stale@v10
         with:
