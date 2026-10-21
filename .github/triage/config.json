@@ -1,0 +1,58 @@
+{
+  "labels": {
+    "verified": "verificada",
+    "review": "em-triagem",
+    "rejected": "triagem-recusada",
+    "override": "revisada"
+  },
+  "rateLimit": { "maxIssues": 8, "days": 7 },
+  "trustedAuthorMinVerified": 3,
+  "lowEffort": { "emojis": 25, "hashtags": 5 },
+  "maxLinksPerSite": 4,
+  "blockedDomains": [
+    "micro1.ai",
+    "mercor.com",
+    "outlier.ai",
+    "dataannotation.tech",
+    "remotasks.com",
+    "alignerr.com",
+    "turing.com"
+  ],
+  "reviewDomains": ["t.me", "telegram.me", "telegram.org"],
+  "terms": {
+    "aiTraining": [
+      "treinamento de ia",
+      "treinar modelos de ia",
+      "treinar e avaliar modelos",
+      "anotacao de dados",
+      "rotulagem de dados",
+      "modelos de fronteira",
+      "laboratorios de ia",
+      "codigo gerado por ia",
+      "rlhf",
+      "ai trainer",
+      "ai training",
+      "data annotation",
+      "data labeling",
+      "train ai models",
+      "training ai models",
+      "frontier models",
+      "ai labs",
+      "ai-generated code"
+    ],
+    "crypto": ["web3", "solidity", "blockchain", "crypto", "cripto", "defi", "smart contract"],
+    "unrelatedTitle": [
+      "marketing", "vendas", "sales", "sdr", "bdr", "designer", "ux", "social media", "copywriter",
+      "recrutador", "recruiter", "analista de dados", "data analyst", "product manager", "product owner",
+      "gerente de projetos", "project manager", "scrum master", "qa", "tester", "suporte", "support",
+      "helpdesk", "ios", "android", "flutter", "react native", "frontend", "front-end", "front end"
+    ],
+    "backendTitle": [
+      "backend", "back-end", "back end", "fullstack", "full-stack", "full stack", "api", "java", "python",
+      "node", "node.js", "go", "golang", ".net", "c#", "php", "ruby", "kotlin", "rust", "elixir", "scala",
+      "devops", "sre", "platform", "plataforma", "cloud", "data engineer", "engenheiro de dados",
+      "software engineer", "engenheiro de software", "engenheira de software", "desenvolvedor de software"
+    ]
+  },
+  "skipAssociations": ["OWNER", "MEMBER", "COLLABORATOR"]
+}
