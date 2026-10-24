@@ -37,18 +37,25 @@ async function upsertComment(repo, issuePath, previousComment, body) {
   else await githubRequest('POST', `${issuePath}/comments`, { body })
 }
 
-// Suggests the format of the form in a comment, or clears the suggestion once the issue follows it.
+function verdictOf(proposal) {
+  if (proposal.bodyChanged) return proposal.titleChanged ? 'title fixed, body suggested' : 'body suggested'
+  return proposal.titleChanged ? 'title fixed' : 'already formatted'
+}
+
+// Fixes the title right away, since its changes are always safe, and only suggests the body of the form in a comment.
+// The suggestion is cleared once the body follows the form.
 async function suggest(issue, repo, isDryRun) {
   const proposal = proposeFormat(issue)
-  const verdict = needsFormatting(proposal) ? 'suggested' : 'already formatted'
+  const verdict = verdictOf(proposal)
   console.log(`#${issue.number}: ${verdict}${proposal.missing.length ? ` (missing: ${proposal.missing.join(', ')})` : ''}`)
   if (isDryRun) return { issue, verdict, proposal }
 
   const issuePath = `/repos/${repo}/issues/${issue.number}`
+  if (proposal.titleChanged) await githubRequest('PATCH', issuePath, { title: proposal.title })
   const previousComment = await formatCommentOf(issuePath)
-  if (needsFormatting(proposal)) {
+  if (proposal.bodyChanged) {
     await githubRequest('POST', `${issuePath}/labels`, { labels: [labels.formatSuggested] })
-    await upsertComment(repo, issuePath, previousComment, buildFormatComment(proposal, labels.applyFormat))
+    await upsertComment(repo, issuePath, previousComment, buildFormatComment({ ...proposal, titleChanged: false }, labels.applyFormat))
   } else if (issue.labels.some((label) => label.name === labels.formatSuggested)) {
     await removeLabel(issuePath, labels.formatSuggested)
     if (previousComment) await githubRequest('DELETE', `/repos/${repo}/issues/comments/${previousComment.id}`)

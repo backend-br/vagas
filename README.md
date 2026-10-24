@@ -35,11 +35,12 @@ Duas rotinas cuidam das vagas já publicadas, sem uso de IA:
 - **Links:** todo dia os links das vagas abertas são verificados. Só conta como quebrado o link cuja página responde
   que não existe mais (404 ou 410) em três tentativas seguidas; bloqueios, lentidão e erros do site são ignorados. A
   vaga recebe o label `link-quebrado` e um comentário com os links. Se nenhum link para se candidatar voltar a funcionar
-  em 7 dias, a issue é fechada. Links do LinkedIn não são verificados, porque o site bloqueia robôs.
-- **Formato:** uma vaga fora do padrão do formulário recebe o label `formato-sugerido` e um comentário com a mesma vaga
-  reorganizada no formato do formulário, com o texto original e sem nada inventado. Nada muda na issue até quem publicou
-  editar a vaga ou uma pessoa mantenedora adicionar o label `aplicar-formato`, que aplica o título e o texto sugeridos.
-  O texto anterior continua no histórico de edições da issue.
+  em 3 dias, a issue é fechada. Links do LinkedIn não são verificados, porque o site bloqueia robôs.
+- **Formato:** o título é ajustado na hora, só no que é certo: o prefixo do modelo de trabalho (`[REMOTO]` vira
+  `[Remoto]`, e entra quando falta), travessões e espaços. Uma vaga com o texto fora do padrão do formulário recebe o
+  label `formato-sugerido` e um comentário com a mesma vaga reorganizada no formato do formulário, com o texto original
+  e sem nada inventado. O texto só muda quando quem publicou editar a vaga ou uma pessoa mantenedora adicionar o label
+  `aplicar-formato`. O texto anterior continua no histórico de edições da issue.
 
 As duas rodam também pela aba Actions, para uma issue ou para todas, em modo de simulação por padrão. Enquanto
 `automaticRunsDryRun` estiver `true` em `.github/triage/config.json`, as execuções automáticas (agendadas e por
