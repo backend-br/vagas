@@ -294,7 +294,7 @@ function longestRun(text, character) {
 const TEXT_BY_LANGUAGE = {
   pt: {
     intro: 'Esta vaga está fora do padrão do formulário. Abaixo está a mesma vaga reorganizada no formato do formulário, com o texto original, sem nada inventado.',
-    how: (applyLabel) => `Nada foi alterado ainda. Quem publicou pode editar a issue com o texto sugerido, ou uma pessoa mantenedora pode aplicar com a label \`${applyLabel}\`. O texto anterior continua no histórico de edições da issue.`,
+    how: (applyLabel) => `O texto da vaga não foi alterado. Quem publicou pode editar a issue com o texto sugerido, ou uma pessoa mantenedora pode aplicar com a label \`${applyLabel}\`. O texto anterior continua no histórico de edições da issue.`,
     title: 'Título sugerido',
     body: 'Texto sugerido',
     missing: 'Faltam informações obrigatórias, que só quem publicou pode completar',
@@ -304,7 +304,7 @@ const TEXT_BY_LANGUAGE = {
   },
   en: {
     intro: 'This job post does not follow the form. Below is the same post reorganized in the shape of the form, with its original text and nothing made up.',
-    how: (applyLabel) => `Nothing was changed yet. The author can edit the issue with the suggested text, or a maintainer can apply it with the \`${applyLabel}\` label. The previous text stays in the edit history of the issue.`,
+    how: (applyLabel) => `The text of the post was not changed. The author can edit the issue with the suggested text, or a maintainer can apply it with the \`${applyLabel}\` label. The previous text stays in the edit history of the issue.`,
     title: 'Suggested title',
     body: 'Suggested text',
     missing: 'Required information is missing, which only the author can fill in',

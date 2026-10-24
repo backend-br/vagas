@@ -20,7 +20,7 @@
     "attempts": 3,
     "retrySeconds": 10,
     "timeoutSeconds": 20,
-    "closeAfterDays": 7
+    "closeAfterDays": 3
   },
   "blockedDomains": [
     "micro1.ai",

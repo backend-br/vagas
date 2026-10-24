@@ -117,3 +117,9 @@ test('the suggestion comment fences the body so its own code blocks cannot break
   assert.match(comment, /`````markdown\n/)
   assert.match(comment, /`aplicar-formato`/)
 })
+
+test('the comment leaves out the title once it was fixed on the issue', () => {
+  const proposal = proposeFormat({ title: '[REMOTO] Dev', body: '## Requisitos\n\nNode', labels: [] })
+  assert.equal(proposal.titleChanged, true)
+  assert.doesNotMatch(buildFormatComment({ ...proposal, titleChanged: false }, 'aplicar-formato'), /Título sugerido|Suggested title/)
+})
