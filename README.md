@@ -30,6 +30,21 @@ Para mantenedores: revise as vagas em
 aprovar, troque `em-triagem` por `verificada`; autores com 3 vagas verificadas passam a ir direto para `verificada`. Para
 que a triagem nunca mais altere uma issue, adicione `revisada`. As regras ficam em `.github/triage/config.json`.
 
+Duas rotinas cuidam das vagas já publicadas, sem uso de IA:
+
+- **Links:** todo dia os links das vagas abertas são verificados. Só conta como quebrado o link cuja página responde
+  que não existe mais (404 ou 410) em três tentativas seguidas; bloqueios, lentidão e erros do site são ignorados. A
+  vaga recebe o label `link-quebrado` e um comentário com os links. Se nenhum link para se candidatar voltar a funcionar
+  em 7 dias, a issue é fechada. Links do LinkedIn não são verificados, porque o site bloqueia robôs.
+- **Formato:** uma vaga fora do padrão do formulário recebe o label `formato-sugerido` e um comentário com a mesma vaga
+  reorganizada no formato do formulário, com o texto original e sem nada inventado. Nada muda na issue até quem publicou
+  editar a vaga ou uma pessoa mantenedora adicionar o label `aplicar-formato`, que aplica o título e o texto sugeridos.
+  O texto anterior continua no histórico de edições da issue.
+
+As duas rodam também pela aba Actions, para uma issue ou para todas, em modo de simulação por padrão. Enquanto
+`automaticRunsDryRun` estiver `true` em `.github/triage/config.json`, as execuções automáticas (agendadas e por
+evento) também só simulam e mostram o resultado no resumo da execução.
+
 ### Posting a job in English
 
 Open an [issue](https://github.com/backend-br/vagas/issues/new/choose) with the English form. Posts go through the same
