@@ -1,0 +1,35 @@
+name: Link check
+
+on:
+  schedule:
+    - cron: '0 9 * * *'
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue number. Leave empty to check every open issue.'
+        required: false
+        type: string
+      dry-run:
+        description: 'Only report the broken links, without changing labels, comments or state.'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: link-check
+
+jobs:
+  check:
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/triage
+          persist-credentials: false
+      - name: Check the links of the open jobs
+        run: node .github/triage/link-check.mjs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

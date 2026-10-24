@@ -3,13 +3,25 @@
     "verified": "verificada",
     "review": "em-triagem",
     "rejected": "triagem-recusada",
-    "override": "revisada"
+    "override": "revisada",
+    "brokenLink": "link-quebrado",
+    "formatSuggested": "formato-sugerido",
+    "applyFormat": "aplicar-formato"
   },
   "formsSince": "2026-10-21T12:26:28Z",
   "rateLimit": { "maxIssues": 8, "days": 7 },
   "trustedAuthorMinVerified": 3,
   "lowEffort": { "emojis": 25, "hashtags": 5 },
   "maxLinksPerSite": 4,
+  "automaticRunsDryRun": true,
+  "linkCheck": {
+    "skipDomains": ["linkedin.com"],
+    "brokenStatuses": [404, 410],
+    "attempts": 3,
+    "retrySeconds": 10,
+    "timeoutSeconds": 20,
+    "closeAfterDays": 7
+  },
   "blockedDomains": [
     "micro1.ai",
     "mercor.com",

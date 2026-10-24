@@ -36,7 +36,7 @@ export async function evaluate(issue, githubLookups) {
   return { language: form.language, form, ...decideVerdict(reasons) }
 }
 
-async function githubRequest(method, path, body) {
+export async function githubRequest(method, path, body) {
   const response = await fetch(`https://api.github.com${path}`, {
     method,
     headers: {
@@ -126,7 +126,7 @@ async function triageIssue(issue, repo, isDryRun) {
   return result
 }
 
-async function listOpenIssues(repo) {
+export async function listOpenIssues(repo) {
   const openIssues = []
   for (let page = 1; ; page++) {
     const pageIssues = await githubRequest('GET', `/repos/${repo}/issues?state=open&per_page=${PAGE_SIZE}&page=${page}`)
