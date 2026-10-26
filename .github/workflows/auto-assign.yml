@@ -12,7 +12,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Assign pull requests
-        uses: gustavofreze/auto-assign@2.0.0
+        uses: gustavofreze/auto-assign@2b04688604e1bc6649d9d75c8273b1699c413853 # 3.0.0
         with:
           assignees: '${{ vars.ASSIGNEES }}'
           github_token: '${{ secrets.GITHUB_TOKEN }}'
