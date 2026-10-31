@@ -17,7 +17,6 @@ const TEXT_BY_LANGUAGE = {
       multiple: 'A issue tem mais de uma vaga. Publique uma vaga por issue.',
       ai_training: 'Vagas de treinamento de IA, anotação de dados ou avaliação de modelos não são aceitas.',
       not_backend: 'O título não parece ser de uma vaga de backend.',
-      rate_limit: (limit) => `O limite de ${limit.maxIssues} vagas a cada ${limit.days} dias por autor foi atingido.`,
       suspicious_contact: 'O contato é feito por canal pouco verificável (ex.: Telegram).',
       crypto: 'Vagas de cripto/web3 passam por revisão manual.',
       low_effort: 'O texto tem excesso de emojis ou hashtags, comum em anúncios publicados em massa.',
@@ -35,7 +34,6 @@ const TEXT_BY_LANGUAGE = {
       multiple: 'The issue contains more than one job. Post one job per issue.',
       ai_training: 'AI training, data annotation and model evaluation gigs are not accepted.',
       not_backend: 'The title does not look like a backend role.',
-      rate_limit: (limit) => `The limit of ${limit.maxIssues} jobs every ${limit.days} days per author was reached.`,
       suspicious_contact: 'Contact goes through a hard to verify channel (e.g. Telegram).',
       crypto: 'Crypto/web3 jobs go through manual review.',
       low_effort: 'The text has too many emojis or hashtags, common in mass-posted ads.',
@@ -43,21 +41,20 @@ const TEXT_BY_LANGUAGE = {
   },
 }
 
-function buildSection(language, { verdict, reasons }, repo, rateLimit) {
+function buildSection(language, { verdict, reasons }, repo) {
   const text = TEXT_BY_LANGUAGE[language]
   const lines = [text[verdict]]
   if (verdict === 'reject') lines.push('', text.fix(repo))
   if (verdict !== 'verified') {
     lines.push('')
     for (const reason of reasons) {
-      const reasonText = text.reasons[reason]
-      lines.push(`- ${typeof reasonText === 'function' ? reasonText(rateLimit) : reasonText}`)
+      lines.push(`- ${text.reasons[reason]}`)
     }
   }
   if (verdict === 'reject') lines.push('', text.mistake)
   return lines.join('\n')
 }
 
-export function buildComment(language, result, repo, rateLimit) {
-  return [COMMENT_MARKER, localize(language, (current) => buildSection(current, result, repo, rateLimit))].join('\n\n')
+export function buildComment(language, result, repo) {
+  return [COMMENT_MARKER, localize(language, (current) => buildSection(current, result, repo))].join('\n\n')
 }

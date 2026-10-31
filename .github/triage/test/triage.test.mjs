@@ -126,7 +126,6 @@ test('verdict: any hard reason rejects, soft reasons send to review', () => {
 
 function fakeGithubLookups(overrides = {}) {
   return {
-    authorIssues: async () => [],
     verifiedCount: async () => 0,
     ...overrides,
   }
@@ -154,18 +153,6 @@ test('evaluate: issues created before the forms existed skip the form check', as
   ])
 })
 
-test('evaluate: rate limit counts issues inside the window ending at creation', async () => {
-  const at = (day) => ({ created_at: `2026-10-${day}T10:00:00Z` })
-  const many = [16, 17, 18, 19, 20, 21, 21, 22, 22].map(at)
-  assert.deepEqual((await evaluate(issue, fakeGithubLookups({ authorIssues: async () => many }))).reasons, [
-    'rate_limit',
-  ])
-  assert.equal(
-    (await evaluate(issue, fakeGithubLookups({ authorIssues: async () => many.slice(1) }))).verdict,
-    'verified',
-  )
-})
-
 test('evaluate: trusted authors skip soft checks but not hard ones', async () => {
   const trusted = fakeGithubLookups({ verifiedCount: async () => 3 })
   assert.equal((await evaluate({ ...issue, title: '[Remoto] Dev Web3 Backend' }, trusted)).verdict, 'verified')
@@ -182,12 +169,9 @@ test('evaluate: soft reasons send to review', async () => {
 })
 
 test('comment is bilingual when the language is unknown', () => {
-  const text = buildComment(null, { verdict: 'reject', reasons: ['form', 'rate_limit'] }, 'backend-br/vagas', {
-    maxIssues: 8,
-    days: 7,
-  })
+  const text = buildComment(null, { verdict: 'reject', reasons: ['form', 'multiple'] }, 'backend-br/vagas')
   assert.match(text, /fechada automaticamente/)
   assert.match(text, /closed automatically/)
-  assert.match(text, /8 vagas a cada 7 dias/)
-  assert.doesNotMatch(buildComment('en', { verdict: 'review', reasons: ['crypto'] }, 'r', {}), /triagem\./)
+  assert.match(text, /mais de uma vaga/)
+  assert.doesNotMatch(buildComment('en', { verdict: 'review', reasons: ['crypto'] }, 'r'), /triagem\./)
 })

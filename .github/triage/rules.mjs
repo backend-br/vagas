@@ -1,4 +1,4 @@
-export const REJECTION_REASONS = new Set(['form', 'multiple', 'ai_training', 'rate_limit'])
+export const REJECTION_REASONS = new Set(['form', 'multiple', 'ai_training'])
 
 const URL_PATTERN = /https?:\/\/([a-z0-9.-]+)[^\s)\]>"']*/gi
 const NUMBERED_EMOJI_PATTERN = /[0-9]️?⃣/g
