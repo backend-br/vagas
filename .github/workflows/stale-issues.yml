@@ -15,8 +15,22 @@ jobs:
         with:
           ascending: true
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          stale-issue-message: 'Esta vaga encontra-se há um bom tempo sem novas interações. Se ainda estiver aberta, faça um comentário, caso contrário, a fecharemos automaticamente em 02 dias.'
-          close-issue-message: 'Esta vaga foi fechada, pois encontra-se há um bom tempo sem novas interações.'
+          stale-issue-message: |
+            Esta vaga está há um bom tempo sem novas interações. Se ainda estiver aberta, faça um comentário. Caso contrário, ela será fechada automaticamente em 2 dias.
+
+            <details><summary>English</summary>
+
+            This job post has had no activity for a long time. If it is still open, leave a comment. Otherwise, it will be closed automatically in 2 days.
+
+            </details>
+          close-issue-message: |
+            Esta vaga foi fechada por estar há um bom tempo sem novas interações.
+
+            <details><summary>English</summary>
+
+            This job post was closed because it had no activity for a long time.
+
+            </details>
           days-before-stale: 30
           days-before-close: 2
 

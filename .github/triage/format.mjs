@@ -1,4 +1,5 @@
 import { FIELD_LABELS_BY_LANGUAGE, REQUIRED_FIELDS, parseForm } from './form.mjs'
+import { detectLanguage } from './language.mjs'
 
 export const FORMAT_COMMENT_MARKER = '<!-- job-format -->'
 
@@ -203,7 +204,8 @@ function readSections(body) {
   return { textByField, matchedLanguages }
 }
 
-function languageOf(matchedLanguages) {
+function languageOf(matchedLanguages, text) {
+  if (!matchedLanguages.length) return detectLanguage(text) ?? 'pt'
   const englishCount = matchedLanguages.filter((language) => language === 'en').length
   return englishCount > matchedLanguages.length - englishCount ? 'en' : 'pt'
 }
@@ -254,7 +256,7 @@ export function proposeFormat(issue) {
   const form = parseForm(body)
   const isAlreadyAForm = form.language !== null
   const { textByField, matchedLanguages } = isAlreadyAForm ? { textByField: form.fields, matchedLanguages: [form.language] } : readSections(body)
-  const language = isAlreadyAForm ? form.language : languageOf(matchedLanguages)
+  const language = isAlreadyAForm ? form.language : languageOf(matchedLanguages, `${issue.title}\n${body}`)
 
   const sectionTexts = [textByField.workModel, textByField.level, textByField.contract, textByField.location].filter(Boolean)
   const facets = { labelNames, sectionTexts, title: issue.title }

@@ -1,3 +1,5 @@
+import { localize } from './language.mjs'
+
 export const COMMENT_MARKER = '<!-- job-triage -->'
 
 const newIssueFormsUrl = (repo) => `https://github.com/${repo}/issues/new/choose`
@@ -54,7 +56,6 @@ function buildSection(language, { verdict, reasons }, repo, rateLimit) {
   return lines.join('\n')
 }
 
-export function buildComment(formLanguage, result, repo, rateLimit) {
-  const languagesToShow = formLanguage ? [formLanguage] : ['pt', 'en']
-  return [COMMENT_MARKER, ...languagesToShow.map((language) => buildSection(language, result, repo, rateLimit))].join('\n\n')
+export function buildComment(language, result, repo, rateLimit) {
+  return [COMMENT_MARKER, localize(language, (current) => buildSection(current, result, repo, rateLimit))].join('\n\n')
 }

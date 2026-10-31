@@ -1,5 +1,6 @@
 import { parseForm } from './form.mjs'
 import { fieldOfHeading } from './format.mjs'
+import { localize } from './language.mjs'
 
 export const LINK_COMMENT_MARKER = '<!-- link-check -->'
 
@@ -82,11 +83,10 @@ const TEXT_BY_LANGUAGE = {
 }
 
 export function buildLinkComment({ action, since }, brokenLinks, language, closeAfterDays) {
-  const languagesToShow = language ? [language] : ['pt', 'en']
-  const sections = languagesToShow.map((lang) => {
-    const text = TEXT_BY_LANGUAGE[lang]
+  const section = localize(language, (current) => {
+    const text = TEXT_BY_LANGUAGE[current]
     if (action === 'close') return text.closed
     return [text.warn, '', ...brokenLinks.map((link) => `- ${link}`), '', text.fix(closeAfterDays)].join('\n')
   })
-  return [LINK_COMMENT_MARKER, `<!-- link-check-since: ${since} -->`, ...sections].join('\n\n')
+  return [LINK_COMMENT_MARKER, `<!-- link-check-since: ${since} -->`, section].join('\n\n')
 }
