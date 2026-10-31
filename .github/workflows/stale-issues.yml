@@ -3,15 +3,24 @@ name: Close stale issues
 on:
   schedule:
     - cron: '0 0 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: stale-issues
+  cancel-in-progress: false
+
+permissions:
+  actions: write
+  issues: write
 
 jobs:
   stale:
-    permissions:
-      actions: write
-      issues: write
+    name: Close stale issues
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/stale@v10
+      - name: Mark and close stale issues
+        uses: actions/stale@v10
         with:
           ascending: true
           repo-token: ${{ secrets.GITHUB_TOKEN }}

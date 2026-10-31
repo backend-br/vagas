@@ -18,17 +18,22 @@ on:
 concurrency:
   group: link-check
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   check:
-    permissions:
-      contents: read
-      issues: write
+    name: Link check
     runs-on: ubuntu-26.04
+    timeout-minutes: 60
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
         with:
           sparse-checkout: .github/triage
           persist-credentials: false
+
       - name: Check the links of the open jobs
         run: node .github/triage/link-check.mjs
         env:

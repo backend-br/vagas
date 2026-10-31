@@ -18,18 +18,23 @@ on:
 concurrency:
   group: triage-${{ github.event.issue.number || 'manual' }}
 
+permissions:
+  contents: read
+  issues: write
+
 jobs:
   triage:
+    name: Job triage
     if: ${{ !github.event.issue.pull_request }}
-    permissions:
-      contents: read
-      issues: write
     runs-on: ubuntu-26.04
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
         with:
           sparse-checkout: .github/triage
           persist-credentials: false
+
       - name: Triage issues
         run: node .github/triage/triage.mjs
         env:

@@ -5,15 +5,24 @@ on:
     types:
       - opened
 
+concurrency:
+  group: auto-assign-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+
 jobs:
-  run:
+  auto-assign:
+    name: Auto assign
     runs-on: ubuntu-26.04
-    permissions:
-      pull-requests: write
+    timeout-minutes: 5
     steps:
       - name: Assign pull requests
         uses: gustavofreze/auto-assign@2b04688604e1bc6649d9d75c8273b1699c413853 # 3.0.0
         with:
           assignees: '${{ vars.ASSIGNEES }}'
           github_token: '${{ secrets.GITHUB_TOKEN }}'
+          allow_self_assign: 'true'
+          allow_no_assignees: 'true'
           assignment_options: 'PULL_REQUEST'
