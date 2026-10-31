@@ -35,6 +35,8 @@ jobs:
           persist-credentials: false
 
       - name: Check the links of the open jobs
-        run: node .github/triage/link-check.mjs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { run } = await import(`${process.env.GITHUB_WORKSPACE}/.github/triage/link-check.mjs`)
+            await run({ github })

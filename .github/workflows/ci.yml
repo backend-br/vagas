@@ -13,8 +13,8 @@ permissions:
   contents: read
 
 jobs:
-  tests:
-    name: Tests
+  review:
+    name: Review
     runs-on: ubuntu-26.04
     timeout-minutes: 5
     steps:
@@ -27,6 +27,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
+
+      - name: Run lint
+        run: npx --yes @biomejs/biome@2.5.15 ci .
 
       - name: Run tests
         run: node --test .github/triage/test/*.test.mjs

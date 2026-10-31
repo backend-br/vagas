@@ -36,6 +36,8 @@ jobs:
           persist-credentials: false
 
       - name: Triage issues
-        run: node .github/triage/triage.mjs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { run } = await import(`${process.env.GITHUB_WORKSPACE}/.github/triage/triage.mjs`)
+            await run({ github })

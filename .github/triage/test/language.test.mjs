@@ -3,11 +3,21 @@ import test from 'node:test'
 import { detectLanguage, issueLanguage, localize } from '../language.mjs'
 
 test('detectLanguage: Portuguese text', () => {
-  assert.equal(detectLanguage('Vaga para pessoa desenvolvedora backend com experiência em Go. A empresa é remota e não exige inglês.'), 'pt')
+  assert.equal(
+    detectLanguage(
+      'Vaga para pessoa desenvolvedora backend com experiência em Go. A empresa é remota e não exige inglês.',
+    ),
+    'pt',
+  )
 })
 
 test('detectLanguage: English text', () => {
-  assert.equal(detectLanguage('We are hiring a backend engineer to work on our payments platform. You will own the API and the database.'), 'en')
+  assert.equal(
+    detectLanguage(
+      'We are hiring a backend engineer to work on our payments platform. You will own the API and the database.',
+    ),
+    'en',
+  )
 })
 
 test('detectLanguage: short or mixed text stays unknown', () => {
@@ -17,7 +27,10 @@ test('detectLanguage: short or mixed text stays unknown', () => {
 })
 
 test('issueLanguage: falls back to the words when no form was used', () => {
-  const issue = { title: 'Backend Engineer', body: 'We are hiring a backend engineer to work on our platform. You will own the API and the database.' }
+  const issue = {
+    title: 'Backend Engineer',
+    body: 'We are hiring a backend engineer to work on our platform. You will own the API and the database.',
+  }
   assert.equal(issueLanguage(issue), 'en')
 })
 

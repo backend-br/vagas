@@ -32,16 +32,39 @@ const HEADINGS_BY_FIELD = {
     en: ['company website', 'website'],
   },
   description: {
-    pt: ['descricao da vaga', 'descricao', 'sobre a vaga', 'a vaga', 'sobre a oportunidade', 'a oportunidade', 'o desafio', 'desafio'],
+    pt: [
+      'descricao da vaga',
+      'descricao',
+      'sobre a vaga',
+      'a vaga',
+      'sobre a oportunidade',
+      'a oportunidade',
+      'o desafio',
+      'desafio',
+    ],
     en: ['job description', 'description', 'about the role', 'about the job', 'job details', 'the role'],
   },
   requirements: {
-    pt: ['requisitos', 'requisitos obrigatorios', 'requisitos minimos', 'requisitos tecnicos', 'o que voce precisa ter', 'qualificacoes'],
+    pt: [
+      'requisitos',
+      'requisitos obrigatorios',
+      'requisitos minimos',
+      'requisitos tecnicos',
+      'o que voce precisa ter',
+      'qualificacoes',
+    ],
     en: ['requirements', 'qualifications', 'minimum qualifications', 'what you need', 'must have'],
   },
   benefits: {
     pt: ['beneficios', 'o que oferecemos', 'o que oferecemos para voce'],
-    en: ['benefits', 'perks', 'perks and benefits', 'compensation and benefits', 'compensation benefits', 'what we offer'],
+    en: [
+      'benefits',
+      'perks',
+      'perks and benefits',
+      'compensation and benefits',
+      'compensation benefits',
+      'what we offer',
+    ],
   },
   salary: {
     pt: ['faixa salarial', 'salario', 'remuneracao'],
@@ -94,9 +117,18 @@ const OPTION_TERMS = {
 }
 
 const OPTION_TRANSLATIONS = {
-  Remoto: 'Remote', Híbrido: 'Hybrid', Presencial: 'On-site',
-  Estagiário: 'Intern', Júnior: 'Junior', Pleno: 'Mid-level', Sênior: 'Senior', Especialista: 'Staff/Principal',
-  CLT: 'CLT', PJ: 'PJ', Contrato: 'Contractor', Freelance: 'Freelance',
+  Remoto: 'Remote',
+  Híbrido: 'Hybrid',
+  Presencial: 'On-site',
+  Estagiário: 'Intern',
+  Júnior: 'Junior',
+  Pleno: 'Mid-level',
+  Sênior: 'Senior',
+  Especialista: 'Staff/Principal',
+  CLT: 'CLT',
+  PJ: 'PJ',
+  Contrato: 'Contractor',
+  Freelance: 'Freelance',
 }
 
 function normalized(text) {
@@ -142,7 +174,9 @@ function splitIntoSections(body) {
 
 function optionsIn(text, facet) {
   const key = normalized(text)
-  return OPTION_TERMS[facet].filter(([, terms]) => terms.some((term) => containsPhrase(key, term))).map(([option]) => option)
+  return OPTION_TERMS[facet]
+    .filter(([, terms]) => terms.some((term) => containsPhrase(key, term)))
+    .map(([option]) => option)
 }
 
 const CONNECTORS = ['ou', 'e', 'or', 'and', 'a', 'de', 'com']
@@ -154,7 +188,10 @@ function saysOnlyOptions(text, facet) {
       while (rest.includes(` ${term} `)) rest = rest.replace(` ${term} `, ' ')
     }
   }
-  return rest.split(' ').filter(Boolean).every((word) => CONNECTORS.includes(word))
+  return rest
+    .split(' ')
+    .filter(Boolean)
+    .every((word) => CONNECTORS.includes(word))
 }
 
 function uniqueOptions(...lists) {
@@ -218,15 +255,17 @@ function formBody(fields, language) {
   const fieldLabels = FIELD_LABELS_BY_LANGUAGE[language]
   const confirmations = CONFIRMATIONS_BY_LANGUAGE[language].map((label) => `- [ ] ${label}`).join('\n')
   return Object.entries(fieldLabels)
-    .map(([field, label]) => `### ${label}\n\n${field === 'confirmations' ? confirmations : fields[field] || NO_RESPONSE}`)
+    .map(
+      ([field, label]) => `### ${label}\n\n${field === 'confirmations' ? confirmations : fields[field] || NO_RESPONSE}`,
+    )
     .join('\n\n')
 }
 
 function canonicalPrefix(prefix, workModels, language) {
   const options = optionsIn(prefix, 'workModel')
-  const isOnlyAWorkModel = options.length === 1 && OPTION_TERMS.workModel
-    .find(([option]) => option === options[0])[1]
-    .includes(normalized(prefix))
+  const isOnlyAWorkModel =
+    options.length === 1 &&
+    OPTION_TERMS.workModel.find(([option]) => option === options[0])[1].includes(normalized(prefix))
   if (isOnlyAWorkModel) return optionText(options, language)
   if (!prefix && workModels.length === 1) return optionText(workModels, language)
   return prefix
@@ -245,7 +284,10 @@ export function normalizeTitle(title, workModels, language) {
 
 function usesTemplatePlaceholder(title) {
   const key = normalized(title)
-  return TEMPLATE_PLACEHOLDERS.some((placeholder) => containsPhrase(key, normalized(placeholder))) || normalized(titlePrefix(title)) === 'alocacao'
+  return (
+    TEMPLATE_PLACEHOLDERS.some((placeholder) => containsPhrase(key, normalized(placeholder))) ||
+    normalized(titlePrefix(title)) === 'alocacao'
+  )
 }
 
 // Proposes the title and the body of an issue in the shape of the issue forms, built only from what the issue
@@ -255,10 +297,14 @@ export function proposeFormat(issue) {
   const body = issue.body ?? ''
   const form = parseForm(body)
   const isAlreadyAForm = form.language !== null
-  const { textByField, matchedLanguages } = isAlreadyAForm ? { textByField: form.fields, matchedLanguages: [form.language] } : readSections(body)
+  const { textByField, matchedLanguages } = isAlreadyAForm
+    ? { textByField: form.fields, matchedLanguages: [form.language] }
+    : readSections(body)
   const language = isAlreadyAForm ? form.language : languageOf(matchedLanguages, `${issue.title}\n${body}`)
 
-  const sectionTexts = [textByField.workModel, textByField.level, textByField.contract, textByField.location].filter(Boolean)
+  const sectionTexts = [textByField.workModel, textByField.level, textByField.contract, textByField.location].filter(
+    Boolean,
+  )
   const facets = { labelNames, sectionTexts, title: issue.title }
   const workModels = optionsOf('workModel', facets)
   const fields = { ...textByField }
@@ -269,7 +315,9 @@ export function proposeFormat(issue) {
       const sectionText = textByField[facet] ?? ''
       // A section that said more than the option, such as the salary beside the contract, keeps its text.
       if (sectionText && !saysOnlyOptions(sectionText, facet)) {
-        fields.description = [fields.description, `**${FIELD_LABELS_BY_LANGUAGE[language][facet]}:** ${sectionText}`].filter(Boolean).join('\n\n')
+        fields.description = [fields.description, `**${FIELD_LABELS_BY_LANGUAGE[language][facet]}:** ${sectionText}`]
+          .filter(Boolean)
+          .join('\n\n')
       }
       fields[facet] = optionText(options, language)
     }
@@ -277,7 +325,9 @@ export function proposeFormat(issue) {
 
   const title = normalizeTitle(issue.title, workModels, language)
   const newBody = isAlreadyAForm ? body : formBody(fields, language)
-  const missing = REQUIRED_FIELDS.filter((field) => !fields[field]).map((field) => FIELD_LABELS_BY_LANGUAGE[language][field])
+  const missing = REQUIRED_FIELDS.filter((field) => !fields[field]).map(
+    (field) => FIELD_LABELS_BY_LANGUAGE[language][field],
+  )
   return {
     language,
     title,
@@ -295,8 +345,10 @@ function longestRun(text, character) {
 
 const TEXT_BY_LANGUAGE = {
   pt: {
-    intro: 'Esta vaga está fora do padrão do formulário. Abaixo está a mesma vaga reorganizada no formato do formulário, com o texto original, sem nada inventado.',
-    how: (applyLabel) => `O texto da vaga não foi alterado. Quem publicou pode editar a issue com o texto sugerido, ou uma pessoa mantenedora pode aplicar com a label \`${applyLabel}\`. O texto anterior continua no histórico de edições da issue.`,
+    intro:
+      'Esta vaga está fora do padrão do formulário. Abaixo está a mesma vaga reorganizada no formato do formulário, com o texto original, sem nada inventado.',
+    how: (applyLabel) =>
+      `O texto da vaga não foi alterado. Quem publicou pode editar a issue com o texto sugerido, ou uma pessoa mantenedora pode aplicar com a label \`${applyLabel}\`. O texto anterior continua no histórico de edições da issue.`,
     title: 'Título sugerido',
     body: 'Texto sugerido',
     missing: 'Faltam informações obrigatórias, que só quem publicou pode completar',
@@ -305,8 +357,10 @@ const TEXT_BY_LANGUAGE = {
     applied: (user) => `Formato aplicado por @${user}. O texto anterior continua no histórico de edições da issue.`,
   },
   en: {
-    intro: 'This job post does not follow the form. Below is the same post reorganized in the shape of the form, with its original text and nothing made up.',
-    how: (applyLabel) => `The text of the post was not changed. The author can edit the issue with the suggested text, or a maintainer can apply it with the \`${applyLabel}\` label. The previous text stays in the edit history of the issue.`,
+    intro:
+      'This job post does not follow the form. Below is the same post reorganized in the shape of the form, with its original text and nothing made up.',
+    how: (applyLabel) =>
+      `The text of the post was not changed. The author can edit the issue with the suggested text, or a maintainer can apply it with the \`${applyLabel}\` label. The previous text stays in the edit history of the issue.`,
     title: 'Suggested title',
     body: 'Suggested text',
     missing: 'Required information is missing, which only the author can fill in',
@@ -324,7 +378,18 @@ export function buildFormatComment(proposal, applyLabel) {
   if (proposal.missing.length) lines.push('', `**${text.missing}:** ${proposal.missing.join(', ')}.`)
   if (proposal.bodyChanged) {
     const fence = '`'.repeat(Math.max(3, longestRun(proposal.body, '`') + 1))
-    lines.push('', text.confirm, '', `<details><summary>${text.body}</summary>`, '', `${fence}markdown`, proposal.body, fence, '', '</details>')
+    lines.push(
+      '',
+      text.confirm,
+      '',
+      `<details><summary>${text.body}</summary>`,
+      '',
+      `${fence}markdown`,
+      proposal.body,
+      fence,
+      '',
+      '</details>',
+    )
   }
   return lines.join('\n')
 }

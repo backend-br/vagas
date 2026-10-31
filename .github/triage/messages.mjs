@@ -9,7 +9,8 @@ const TEXT_BY_LANGUAGE = {
     reject: 'Esta vaga foi fechada automaticamente pela triagem.',
     review: 'Esta vaga está em triagem e será revisada por uma pessoa mantenedora.',
     verified: 'Esta vaga foi revisada e aprovada pela triagem.',
-    fix: (repo) => `Edite a issue corrigindo os pontos abaixo e ela será reavaliada automaticamente. Para uma vaga nova, use um dos [formulários](${newIssueFormsUrl(repo)}).`,
+    fix: (repo) =>
+      `Edite a issue corrigindo os pontos abaixo e ela será reavaliada automaticamente. Para uma vaga nova, use um dos [formulários](${newIssueFormsUrl(repo)}).`,
     mistake: 'Se achar que foi um engano, comente aqui.',
     reasons: {
       form: 'O formulário não foi usado ou está incompleto (campos obrigatórios, descrição curta ou confirmações desmarcadas).',
@@ -26,7 +27,8 @@ const TEXT_BY_LANGUAGE = {
     reject: 'This job post was closed automatically by triage.',
     review: 'This job post is under triage and will be reviewed by a maintainer.',
     verified: 'This job post was reviewed and approved by triage.',
-    fix: (repo) => `Edit the issue fixing the points below and it will be re-evaluated automatically. For a new job, use one of the [forms](${newIssueFormsUrl(repo)}).`,
+    fix: (repo) =>
+      `Edit the issue fixing the points below and it will be re-evaluated automatically. For a new job, use one of the [forms](${newIssueFormsUrl(repo)}).`,
     mistake: 'If you think this is a mistake, leave a comment.',
     reasons: {
       form: 'The form was not used or is incomplete (required fields, short description or unchecked confirmations).',

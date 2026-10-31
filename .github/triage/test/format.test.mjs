@@ -44,7 +44,11 @@ https://jobs.quickin.io/igma/jobs/1
 #### Nível
 - Pleno`
 
-const legacyIssue = { title: '[REMOTO] Desenvolvedor Full-Stack Pleno  –  Igma', body: LEGACY_BODY, labels: [{ name: 'PJ' }, { name: 'Pleno' }, { name: 'Remoto' }, { name: 'Node.js' }] }
+const legacyIssue = {
+  title: '[REMOTO] Desenvolvedor Full-Stack Pleno  –  Igma',
+  body: LEGACY_BODY,
+  labels: [{ name: 'PJ' }, { name: 'Pleno' }, { name: 'Remoto' }, { name: 'Node.js' }],
+}
 
 test('reorganizes a legacy post into the pt-BR form without dropping any text', () => {
   const proposal = proposeFormat(legacyIssue)
@@ -80,7 +84,8 @@ test('a post with no known heading keeps all of its text as the description', ()
 })
 
 test('reads an English legacy post into the en-US form', () => {
-  const body = '## About us\n\nWe build APIs.\n\n## Requirements\n\nGo\n\n## Type of contract\n\nContractor\n\n## Modality\n\nFully remote\n\n## How to apply\n\nhttps://company.com/jobs'
+  const body =
+    '## About us\n\nWe build APIs.\n\n## Requirements\n\nGo\n\n## Type of contract\n\nContractor\n\n## Modality\n\nFully remote\n\n## How to apply\n\nhttps://company.com/jobs'
   const proposal = proposeFormat({ title: '(Full-remote) Senior Go Engineer - Jobsity', body, labels: [] })
   const form = parseForm(proposal.body)
   assert.equal(proposal.language, 'en')
@@ -90,23 +95,33 @@ test('reads an English legacy post into the en-US form', () => {
 })
 
 test('leaves a post made with the form as it is', () => {
-  const body = '### Sobre a empresa\n\nFintech.\n\n### Site da empresa\n\nhttps://empresa.com.br\n\n### Descrição da vaga\n\nAPIs.\n\n### Requisitos\n\nGo\n\n### Nível\n\nPleno\n\n### Regime de contratação\n\nCLT\n\n### Modelo de trabalho\n\nRemoto\n\n### Como se candidatar\n\nhttps://empresa.com.br/vagas'
+  const body =
+    '### Sobre a empresa\n\nFintech.\n\n### Site da empresa\n\nhttps://empresa.com.br\n\n### Descrição da vaga\n\nAPIs.\n\n### Requisitos\n\nGo\n\n### Nível\n\nPleno\n\n### Regime de contratação\n\nCLT\n\n### Modelo de trabalho\n\nRemoto\n\n### Como se candidatar\n\nhttps://empresa.com.br/vagas'
   const proposal = proposeFormat({ title: '[Remoto] Back-end Pleno - Empresa', body, labels: [] })
   assert.equal(needsFormatting(proposal), false)
   assert.equal(proposal.body, body)
 })
 
 test('the title only changes where the change is certain', () => {
-  assert.equal(normalizeTitle('[REMOTO] Back-end Developer JR - PORT LOUIS', [], 'pt'), '[Remoto] Back-end Developer JR - PORT LOUIS')
+  assert.equal(
+    normalizeTitle('[REMOTO] Back-end Developer JR - PORT LOUIS', [], 'pt'),
+    '[Remoto] Back-end Developer JR - PORT LOUIS',
+  )
   assert.equal(normalizeTitle('[100% Remoto] Dev Go — Empresa', [], 'pt'), '[Remoto] Dev Go - Empresa')
   assert.equal(normalizeTitle('Dev Go - Empresa', ['Híbrido'], 'pt'), '[Híbrido] Dev Go - Empresa')
   assert.equal(normalizeTitle('Dev Go - Empresa', ['Remoto', 'Híbrido'], 'pt'), 'Dev Go - Empresa')
   assert.equal(normalizeTitle('[Híbrido-SP] Dev Cobol - Evertec', [], 'pt'), '[Híbrido-SP] Dev Cobol - Evertec')
-  assert.equal(normalizeTitle('[Belo Horizonte, Brasil] Software Engineer na Google', ['Remoto'], 'pt'), '[Belo Horizonte, Brasil] Software Engineer na Google')
+  assert.equal(
+    normalizeTitle('[Belo Horizonte, Brasil] Software Engineer na Google', ['Remoto'], 'pt'),
+    '[Belo Horizonte, Brasil] Software Engineer na Google',
+  )
 })
 
 test('flags a title that kept the example text of the template', () => {
-  assert.equal(proposeFormat({ title: '[Alocação] Back-end developer - NomeDaEmpresa', body: '', labels: [] }).placeholderTitle, true)
+  assert.equal(
+    proposeFormat({ title: '[Alocação] Back-end developer - NomeDaEmpresa', body: '', labels: [] }).placeholderTitle,
+    true,
+  )
   assert.equal(proposeFormat(legacyIssue).placeholderTitle, false)
 })
 
@@ -121,5 +136,8 @@ test('the suggestion comment fences the body so its own code blocks cannot break
 test('the comment leaves out the title once it was fixed on the issue', () => {
   const proposal = proposeFormat({ title: '[REMOTO] Dev', body: '## Requisitos\n\nNode', labels: [] })
   assert.equal(proposal.titleChanged, true)
-  assert.doesNotMatch(buildFormatComment({ ...proposal, titleChanged: false }, 'aplicar-formato'), /Título sugerido|Suggested title/)
+  assert.doesNotMatch(
+    buildFormatComment({ ...proposal, titleChanged: false }, 'aplicar-formato'),
+    /Título sugerido|Suggested title/,
+  )
 })
