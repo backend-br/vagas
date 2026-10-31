@@ -11,6 +11,6 @@ export async function githubRequest(method, path, body) {
   return data ?? null
 }
 
-export function listOpenIssues(repo) {
-  return octokit.paginate(`GET /repos/${repo}/issues`, { state: 'open', per_page: PAGE_SIZE })
+export function listOpenIssues(repo, filters = {}) {
+  return octokit.paginate(`GET /repos/${repo}/issues`, { state: 'open', per_page: PAGE_SIZE, ...filters })
 }

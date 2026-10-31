@@ -1,9 +1,12 @@
+import { canonicalNames, stacksInText } from './taxonomy.mjs'
+
 export const FIELD_LABELS_BY_LANGUAGE = {
   pt: {
     company: 'Sobre a empresa',
     companyUrl: 'Site da empresa',
     description: 'Descrição da vaga',
     requirements: 'Requisitos',
+    stack: 'Tecnologias',
     benefits: 'Benefícios',
     salary: 'Faixa salarial',
     level: 'Nível',
@@ -18,6 +21,7 @@ export const FIELD_LABELS_BY_LANGUAGE = {
     companyUrl: 'Company website',
     description: 'Job description',
     requirements: 'Requirements',
+    stack: 'Technologies',
     benefits: 'Benefits',
     salary: 'Salary range',
     level: 'Level',
@@ -39,30 +43,6 @@ export const REQUIRED_FIELDS = [
   'workModel',
   'apply',
 ]
-
-const REPOSITORY_LABEL_BY_DROPDOWN_VALUE = {
-  Estagiário: 'Estagiário',
-  Intern: 'Estagiário',
-  Júnior: 'Júnior',
-  Junior: 'Júnior',
-  Pleno: 'Pleno',
-  'Mid-level': 'Pleno',
-  Sênior: 'Sênior',
-  Senior: 'Sênior',
-  Especialista: 'Especialista',
-  'Staff/Principal': 'Especialista',
-  CLT: 'CLT',
-  PJ: 'PJ',
-  Contrato: 'Contrato',
-  Contractor: 'Contrato',
-  Freelance: 'Freelance',
-  Remoto: 'Remoto',
-  Remote: 'Remoto',
-  Híbrido: 'Híbrido',
-  Hybrid: 'Híbrido',
-  Presencial: 'Presencial',
-  'On-site': 'Presencial',
-}
 
 const MIN_DESCRIPTION_LENGTH = 80
 
@@ -110,9 +90,14 @@ export function parseForm(body) {
   return { language, fields, problems: isFormComplete(fields) ? [] : ['form'] }
 }
 
-export function repositoryLabelsFromForm(fields) {
-  return [fields.level, fields.contract, fields.workModel]
-    .flatMap((value) => (value ?? '').split(','))
-    .map((value) => REPOSITORY_LABEL_BY_DROPDOWN_VALUE[value.trim()])
-    .filter(Boolean)
+export function repositoryLabelsFromForm(fields, taxonomy, title = '') {
+  const stacks = fields.stack
+    ? canonicalNames(taxonomy, 'stacks', fields.stack)
+    : stacksInText(taxonomy, [title, fields.requirements, fields.description].filter(Boolean).join('\n'))
+  return [
+    ...canonicalNames(taxonomy, 'levels', fields.level),
+    ...canonicalNames(taxonomy, 'contracts', fields.contract),
+    ...canonicalNames(taxonomy, 'workModels', fields.workModel),
+    ...stacks,
+  ]
 }

@@ -36,8 +36,20 @@ jobs:
           sparse-checkout: .github/triage
           persist-credentials: false
 
+      - name: Checkout shared taxonomy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: backend-br/.github
+          ref: main
+          path: .shared
+          sparse-checkout: taxonomy.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Suggest or apply the format of the form
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          TAXONOMY_FILE: ${{ github.workspace }}/.shared/taxonomy.json
         with:
           script: |
             const { run } = await import(`${process.env.GITHUB_WORKSPACE}/.github/triage/job-format.mjs`)

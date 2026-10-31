@@ -11,7 +11,9 @@ Espaço para a divulgação de vagas para desenvolvedores backend via issues do 
 ## Como cadastrar uma vaga?
 
 Abra uma [issue](https://github.com/backend-br/vagas/issues/new/choose) usando o formulário em português ou em
-inglês. Os labels de nível, regime e modelo de trabalho são aplicados a partir do formulário.
+inglês. Os labels de nível, regime, modelo de trabalho e tecnologias são aplicados a partir do formulário. Eles seguem
+a [taxonomia compartilhada](https://github.com/backend-br/.github/blob/main/taxonomy.json) com o
+[me-contrata](https://github.com/backend-br/me-contrata).
 
 Toda vaga nova passa por uma triagem automática:
 
@@ -30,7 +32,7 @@ Para mantenedores: revise as vagas em
 aprovar, troque `em-triagem` por `verificada`; autores com 3 vagas verificadas passam a ir direto para `verificada`. Para
 que a triagem nunca mais altere uma issue, adicione `revisada`. As regras ficam em `.github/triage/config.json`.
 
-Duas rotinas cuidam das vagas já publicadas, sem uso de IA:
+Três rotinas cuidam das vagas já publicadas, sem uso de IA:
 
 - **Links:** todo dia os links das vagas abertas são verificados. Só conta como quebrado o link cuja página responde
   que não existe mais (404 ou 410) em três tentativas seguidas; bloqueios, lentidão e erros do site são ignorados. A
@@ -41,8 +43,13 @@ Duas rotinas cuidam das vagas já publicadas, sem uso de IA:
   label `formato-sugerido` e um comentário com a mesma vaga reorganizada no formato do formulário, com o texto original
   e sem nada inventado. O texto só muda quando quem publicou editar a vaga ou uma pessoa mantenedora adicionar o label
   `aplicar-formato`. O texto anterior continua no histórico de edições da issue.
+- **Perfis compatíveis:** toda vaga `verificada` recebe um comentário com até 5 perfis do
+  [me-contrata](https://github.com/backend-br/me-contrata) que pediram para ser divulgados. Entram só perfis com o mesmo
+  nível, ao menos um regime e um modelo de trabalho em comum, a mesma UF quando a vaga é híbrida ou presencial, e ao
+  menos 2 tecnologias em comum (ou a única, quando a vaga tem uma só). Ninguém é mencionado. O comentário é atualizado
+  todo dia, e some quando nenhum perfil combina mais.
 
-As duas rodam também pela aba Actions, para uma issue ou para todas, em modo de simulação por padrão. Enquanto
+As três rodam também pela aba Actions, para uma issue ou para todas, em modo de simulação por padrão. Enquanto
 `automaticRunsDryRun` estiver `true` em `.github/triage/config.json`, as execuções automáticas (agendadas e por
 evento) também só simulam e mostram o resultado no resumo da execução.
 

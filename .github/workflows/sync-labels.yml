@@ -1,0 +1,26 @@
+name: Sync labels
+
+on:
+  schedule:
+    - cron: '0 0 1 * *'
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Only report the label changes, without applying them.'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: sync-labels
+
+permissions: {}
+
+jobs:
+  sync-labels:
+    name: Sync labels
+    permissions:
+      issues: write
+    uses: backend-br/.github/.github/workflows/sync-labels.yml@ed405a15c3be6affe082f783f6e5b8fa0b6a3fb1
+    with:
+      dry-run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry-run }}

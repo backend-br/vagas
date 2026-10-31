@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { parseForm, repositoryLabelsFromForm } from '../form.mjs'
 import { buildFormatComment, needsFormatting, normalizeTitle, proposeFormat } from '../format.mjs'
+import { taxonomy } from './taxonomy.fixture.mjs'
 
 const LEGACY_BODY = `<!-- Por favor, poste apenas vagas para backend. -->
 
@@ -62,7 +63,7 @@ test('reorganizes a legacy post into the pt-BR form without dropping any text', 
   assert.match(form.fields.requirements, /- Node\.js\n\n\*\*Etapas do processo\*\*\n\n1\. Entrevista/)
   assert.equal(form.fields.location, '100% Remoto')
   assert.equal(form.fields.apply, 'https://jobs.quickin.io/igma/jobs/1')
-  assert.deepEqual(repositoryLabelsFromForm(form.fields), ['Pleno', 'PJ', 'Remoto'])
+  assert.deepEqual(repositoryLabelsFromForm(form.fields, taxonomy), ['Pleno', 'PJ', 'Remoto', 'Node.js', 'PostgreSQL'])
 })
 
 test('keeps the salary that came beside the contract, and drops the old list of labels and comments', () => {

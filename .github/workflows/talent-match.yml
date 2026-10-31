@@ -1,0 +1,55 @@
+name: Talent match
+
+on:
+  schedule:
+    - cron: '0 10 * * *'
+  workflow_dispatch:
+    inputs:
+      issue:
+        description: 'Issue number. Leave empty to match every verified open job.'
+        required: false
+        type: string
+      dry-run:
+        description: 'Only report the matches, without changing comments.'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: talent-match
+
+permissions: {}
+
+jobs:
+  match:
+    name: Talent match
+    permissions:
+      contents: read
+      issues: write
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          sparse-checkout: .github/triage
+          persist-credentials: false
+
+      - name: Checkout shared taxonomy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: backend-br/.github
+          ref: main
+          path: .shared
+          sparse-checkout: taxonomy.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Share matching profiles on the verified jobs
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          TAXONOMY_FILE: ${{ github.workspace }}/.shared/taxonomy.json
+        with:
+          script: |
+            const { run } = await import(`${process.env.GITHUB_WORKSPACE}/.github/triage/talent-match.mjs`)
+            await run({ github })
