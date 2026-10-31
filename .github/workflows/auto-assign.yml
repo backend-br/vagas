@@ -17,6 +17,6 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    uses: backend-br/.github/.github/workflows/auto-assign.yml@main
+    uses: backend-br/.github/.github/workflows/auto-assign.yml@9e4bf553947273dcb44ef6ca52df19ce048b2820
     with:
       assignment-options: 'PULL_REQUEST'
