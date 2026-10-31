@@ -13,7 +13,14 @@
   "trustedAuthorMinVerified": 3,
   "lowEffort": { "emojis": 25, "hashtags": 5 },
   "maxLinksPerSite": 4,
-  "automaticRunsDryRun": true,
+  "automaticRunsDryRun": false,
+  "talentMatch": {
+    "profilesRepo": "backend-br/me-contrata",
+    "profileLabels": { "verified": "verificado", "optIn": "divulgar-perfil" },
+    "maxProfiles": 5,
+    "minCommonStacks": 2,
+    "siteUrl": "https://backend-br.github.io/talentos/"
+  },
   "linkCheck": {
     "skipDomains": ["linkedin.com"],
     "brokenStatuses": [404, 410],

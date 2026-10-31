@@ -4,6 +4,7 @@ import { parseForm, repositoryLabelsFromForm } from '../form.mjs'
 import { buildComment } from '../messages.mjs'
 import { contentReasons, decideVerdict } from '../rules.mjs'
 import { evaluate } from '../triage.mjs'
+import { taxonomy } from './taxonomy.fixture.mjs'
 
 const config = {
   blockedDomains: ['micro1.ai'],
@@ -60,14 +61,28 @@ test('parses the pt-BR form and maps labels', () => {
   const form = parseForm(ptBody())
   assert.equal(form.language, 'pt')
   assert.deepEqual(form.problems, [])
-  assert.deepEqual(repositoryLabelsFromForm(form.fields), ['Pleno', 'CLT', 'PJ', 'Remoto'])
+  assert.deepEqual(repositoryLabelsFromForm(form.fields, taxonomy), [
+    'Pleno',
+    'CLT',
+    'PJ',
+    'Remoto',
+    'Node.js',
+    'PostgreSQL',
+  ])
 })
 
 test('parses the en-US form and maps labels to the Portuguese ones', () => {
   const form = parseForm(enBody)
   assert.equal(form.language, 'en')
   assert.deepEqual(form.problems, [])
-  assert.deepEqual(repositoryLabelsFromForm(form.fields), ['Especialista', 'Contrato', 'Híbrido'])
+  assert.deepEqual(repositoryLabelsFromForm(form.fields, taxonomy), [
+    'Especialista',
+    'Contrato',
+    'Híbrido',
+    'Go',
+    'Node.js',
+    'PostgreSQL',
+  ])
 })
 
 test('rejects bodies that do not come from a form', () => {

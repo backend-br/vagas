@@ -8,11 +8,14 @@ import {
   proposeFormat,
 } from './format.mjs'
 import { githubRequest, listOpenIssues, useOctokit } from './github.mjs'
+import { loadTaxonomy } from './taxonomy.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
 const { labels } = config
 const PAGE_SIZE = 100
 const ROLES_ALLOWED_TO_APPLY = ['admin', 'maintain', 'write', 'triage']
+
+let taxonomy = null
 
 function skipReason(issue) {
   const labelNames = issue.labels.map((label) => label.name)
@@ -96,7 +99,7 @@ async function applyFromLabel(issue, sender, repo) {
     return { issue, verdict: 'already formatted' }
   }
   await githubRequest('PATCH', issuePath, { title: proposal.title, body: proposal.body })
-  const formLabels = repositoryLabelsFromForm(parseForm(proposal.body).fields)
+  const formLabels = repositoryLabelsFromForm(parseForm(proposal.body).fields, taxonomy, proposal.title)
   if (formLabels.length) await githubRequest('POST', `${issuePath}/labels`, { labels: formLabels })
   await removeLabel(issuePath, labels.formatSuggested)
   await upsertComment(
@@ -170,5 +173,6 @@ async function main() {
 
 export function run({ github }) {
   useOctokit(github)
+  taxonomy = loadTaxonomy()
   return main()
 }

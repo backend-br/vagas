@@ -24,6 +24,16 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Checkout shared taxonomy
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: backend-br/.github
+          ref: main
+          path: .shared
+          sparse-checkout: taxonomy.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
       - name: Setup Node
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
@@ -33,4 +43,6 @@ jobs:
         run: npx --yes @biomejs/biome@2.6.4 ci .
 
       - name: Run tests
+        env:
+          TAXONOMY_FILE: ${{ github.workspace }}/.shared/taxonomy.json
         run: node --test .github/triage/test/*.test.mjs

@@ -36,6 +36,73 @@ body:
       description: Separe obrigatórios e desejáveis.
     validations:
       required: true
+  - type: dropdown
+    id: stack
+    attributes:
+      label: Tecnologias
+      description: As principais tecnologias da vaga. Elas viram labels e ajudam a encontrar perfis compatíveis.
+      multiple: true
+      options:
+        - ".NET"
+        - Apache Kafka
+        - ASP
+        - AWS
+        - Azure
+        - "C#"
+        - C++
+        - CI/CD
+        - Clean architecture
+        - Clipper
+        - DDD
+        - Delphi
+        - Django
+        - Docker
+        - DRY
+        - DynamoDB
+        - Elasticsearch
+        - Elixir
+        - Event-Driven architecture
+        - FastAPI
+        - Flask
+        - GCP
+        - Git
+        - Go
+        - GraphQL
+        - gRPC
+        - Hexagonal architecture
+        - Java
+        - JavaScript
+        - Jenkins
+        - Kotlin
+        - Kubernetes
+        - Laravel
+        - Linux
+        - Microservices
+        - MongoDB
+        - MySQL
+        - NestJS
+        - Node.js
+        - OOP
+        - Oracle
+        - PHP
+        - PostgreSQL
+        - Python
+        - RabbitMQ
+        - Redis
+        - Ruby
+        - Ruby on Rails
+        - Rust
+        - Scala
+        - SOLID
+        - Spring
+        - SQL
+        - SQL Server
+        - Symfony
+        - TDD
+        - Terraform
+        - Testes automatizados
+        - TypeScript
+        - Windows
   - type: textarea
     id: benefits
     attributes:
@@ -83,7 +150,8 @@ body:
     id: location
     attributes:
       label: Localização
-      description: Cidade/estado, se híbrido ou presencial.
+      description: Cidade e UF, se híbrido ou presencial.
+      placeholder: São Paulo - SP
   - type: textarea
     id: apply
     attributes:

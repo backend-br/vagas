@@ -1,13 +1,17 @@
 import { appendFileSync, readFileSync } from 'node:fs'
-import { parseForm, repositoryLabelsFromForm } from './form.mjs'
+import { parseForm } from './form.mjs'
 import { githubRequest, listOpenIssues, useOctokit } from './github.mjs'
+import { labelChanges } from './labels.mjs'
 import { issueLanguage } from './language.mjs'
 import { COMMENT_MARKER, buildComment } from './messages.mjs'
 import { REJECTION_REASONS, contentReasons, decideVerdict } from './rules.mjs'
+import { loadTaxonomy } from './taxonomy.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 const PAGE_SIZE = 100
+
+let taxonomy = null
 
 function isAfterFormsWereCreated(createdAt) {
   return createdAt >= new Date(config.formsSince).getTime()
@@ -84,14 +88,18 @@ function githubLookupsFor(issue, repo) {
 async function applyLabels(issue, issuePath, result) {
   const { verified, review, rejected } = config.labels
   const verdictLabel = { verified, review, reject: rejected }[result.verdict]
-  const outdatedTriageLabels = labelNamesOf(issue).filter(
-    (name) => triageLabelNames().includes(name) && name !== verdictLabel,
-  )
-  for (const name of outdatedTriageLabels) {
+  const { remove, add } = labelChanges({
+    issue,
+    form: result.form,
+    taxonomy,
+    statusLabels: triageLabelNames(),
+    verdictLabel,
+    isRejected: result.verdict === 'reject',
+  })
+  for (const name of remove) {
     await githubRequest('DELETE', `${issuePath}/labels/${encodeURIComponent(name)}`)
   }
-  const formLabels = result.verdict === 'reject' ? [] : repositoryLabelsFromForm(result.form.fields)
-  await githubRequest('POST', `${issuePath}/labels`, { labels: [verdictLabel, ...formLabels] })
+  if (add.length) await githubRequest('POST', `${issuePath}/labels`, { labels: add })
 }
 
 async function upsertTriageComment(repo, issuePath, result) {
@@ -197,5 +205,6 @@ async function main() {
 
 export function run({ github }) {
   useOctokit(github)
+  taxonomy = loadTaxonomy()
   return main()
 }
