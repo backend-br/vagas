@@ -1,6 +1,6 @@
 import { appendFileSync, readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
-import { proposeFormat } from './format.mjs'
+import { issueLanguage } from './language.mjs'
 import { LINK_COMMENT_MARKER, applyLinksOf, buildLinkComment, classifyAnswer, decideLinkAction, linksOf, sinceOf } from './links.mjs'
 import { githubRequest, listOpenIssues } from './triage.mjs'
 
@@ -67,7 +67,7 @@ async function applyDecision(repo, issue, decision, brokenLinks, previousComment
     if (previousComment) await githubRequest('DELETE', `/repos/${repo}/issues/comments/${previousComment.id}`)
     return
   }
-  const language = proposeFormat(issue).language
+  const language = issueLanguage(issue)
   const body = buildLinkComment(decision, brokenLinks, language, linkCheck.closeAfterDays)
   await githubRequest('POST', `${issuePath}/labels`, { labels: [labels.brokenLink] })
   if (previousComment && previousComment.body !== body) await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousComment.id}`, { body })

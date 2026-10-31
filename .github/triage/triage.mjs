@@ -1,6 +1,7 @@
 import { appendFileSync, readFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 import { parseForm, repositoryLabelsFromForm } from './form.mjs'
+import { issueLanguage } from './language.mjs'
 import { COMMENT_MARKER, buildComment } from './messages.mjs'
 import { REJECTION_REASONS, contentReasons, decideVerdict } from './rules.mjs'
 
@@ -33,7 +34,7 @@ export async function evaluate(issue, githubLookups) {
     const isTrustedAuthor = (await githubLookups.verifiedCount()) >= config.trustedAuthorMinVerified
     if (isTrustedAuthor) reasons = reasons.filter((reason) => REJECTION_REASONS.has(reason))
   }
-  return { language: form.language, form, ...decideVerdict(reasons) }
+  return { language: issueLanguage(issue), form, ...decideVerdict(reasons) }
 }
 
 export async function githubRequest(method, path, body) {
