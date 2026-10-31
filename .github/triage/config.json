@@ -9,7 +9,6 @@
     "applyFormat": "aplicar-formato"
   },
   "formsSince": "2026-10-21T12:26:28Z",
-  "rateLimit": { "maxIssues": 8, "days": 7 },
   "trustedAuthorMinVerified": 3,
   "lowEffort": { "emojis": 25, "hashtags": 5 },
   "maxLinksPerSite": 4,

@@ -8,7 +8,6 @@ import { REJECTION_REASONS, contentReasons, decideVerdict } from './rules.mjs'
 import { loadTaxonomy } from './taxonomy.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
-const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000
 const PAGE_SIZE = 100
 
 let taxonomy = null
@@ -17,22 +16,11 @@ function isAfterFormsWereCreated(createdAt) {
   return createdAt >= new Date(config.formsSince).getTime()
 }
 
-function issuesInsideRateLimitWindow(authorIssues, createdAt) {
-  const windowStart = createdAt - config.rateLimit.days * MILLISECONDS_PER_DAY
-  return authorIssues.filter((authorIssue) => {
-    const authorIssueCreatedAt = new Date(authorIssue.created_at).getTime()
-    return authorIssueCreatedAt <= createdAt && authorIssueCreatedAt > windowStart
-  })
-}
-
 export async function evaluate(issue, githubLookups) {
   const form = parseForm(issue.body)
   const createdAt = new Date(issue.created_at).getTime()
   const formReasons = isAfterFormsWereCreated(createdAt) ? form.problems : []
   let reasons = [...formReasons, ...contentReasons(issue.title, issue.body, config)]
-
-  const recentAuthorIssues = issuesInsideRateLimitWindow(await githubLookups.authorIssues(), createdAt)
-  if (recentAuthorIssues.length > config.rateLimit.maxIssues) reasons.push('rate_limit')
 
   if (decideVerdict(reasons).verdict !== 'reject') {
     const isTrustedAuthor = (await githubLookups.verifiedCount()) >= config.trustedAuthorMinVerified
@@ -64,16 +52,6 @@ function githubLookupsFor(issue, repo) {
   const author = issue.user.login
   const issuesPath = `/repos/${repo}/issues`
   return {
-    authorIssues: async () => {
-      const rateLimitWindowStart = new Date(
-        new Date(issue.created_at).getTime() - (config.rateLimit.days + 1) * MILLISECONDS_PER_DAY,
-      )
-      const authorIssues = await githubRequest(
-        'GET',
-        `${issuesPath}?creator=${author}&state=all&since=${rateLimitWindowStart.toISOString()}&per_page=${PAGE_SIZE}`,
-      )
-      return authorIssues.filter((authorIssue) => !authorIssue.pull_request)
-    },
     verifiedCount: async () => {
       const verifiedLabel = encodeURIComponent(config.labels.verified)
       const verifiedIssues = await githubRequest(
@@ -107,7 +85,7 @@ async function upsertTriageComment(repo, issuePath, result) {
   const previousTriageComment = comments.find(
     (comment) => comment.user.type === 'Bot' && comment.body.startsWith(COMMENT_MARKER),
   )
-  const body = buildComment(result.language, result, repo, config.rateLimit)
+  const body = buildComment(result.language, result, repo)
   if (previousTriageComment)
     await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousTriageComment.id}`, { body })
   else if (result.verdict !== 'verified') await githubRequest('POST', `${issuePath}/comments`, { body })

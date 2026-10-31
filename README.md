@@ -19,7 +19,6 @@ Toda vaga nova passa por uma triagem automática:
 
 - Uma vaga por issue, apenas para backend (ou fullstack com foco em backend).
 - Vagas de treinamento de IA, anotação de dados ou avaliação de modelos não são aceitas.
-- Cada autor pode publicar até 8 vagas a cada 7 dias.
 - Vagas aprovadas recebem o label `verificada`. Vagas com dúvida recebem `em-triagem` e são revisadas por uma pessoa
   mantenedora. Vagas recusadas são fechadas com um comentário explicando o motivo; basta editar a issue para ela ser
   reavaliada.
@@ -56,7 +55,7 @@ evento) também só simulam e mostram o resultado no resumo da execução.
 ### Posting a job in English
 
 Open an [issue](https://github.com/backend-br/vagas/issues/new/choose) with the English form. Posts go through the same
-automatic triage: one backend job per issue, no AI training gigs, up to 8 posts per author every 7 days.
+automatic triage: one backend job per issue, no AI training gigs.
 
 ## Como receber atualizações das vagas?
 
