@@ -1,6 +1,6 @@
 import { appendFileSync, readFileSync } from 'node:fs'
-import { pathToFileURL } from 'node:url'
 import { parseForm, repositoryLabelsFromForm } from './form.mjs'
+import { githubRequest, listOpenIssues, useOctokit } from './github.mjs'
 import { issueLanguage } from './language.mjs'
 import { COMMENT_MARKER, buildComment } from './messages.mjs'
 import { REJECTION_REASONS, contentReasons, decideVerdict } from './rules.mjs'
@@ -37,20 +37,6 @@ export async function evaluate(issue, githubLookups) {
   return { language: issueLanguage(issue), form, ...decideVerdict(reasons) }
 }
 
-export async function githubRequest(method, path, body) {
-  const response = await fetch(`https://api.github.com${path}`, {
-    method,
-    headers: {
-      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
-      Accept: 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-    body: body && JSON.stringify(body),
-  })
-  if (!response.ok) throw new Error(`${method} ${path}: ${response.status} ${await response.text()}`)
-  return response.status === 204 ? null : response.json()
-}
-
 function triageLabelNames() {
   const { verified, review, rejected } = config.labels
   return [verified, review, rejected]
@@ -75,13 +61,21 @@ function githubLookupsFor(issue, repo) {
   const issuesPath = `/repos/${repo}/issues`
   return {
     authorIssues: async () => {
-      const rateLimitWindowStart = new Date(new Date(issue.created_at).getTime() - (config.rateLimit.days + 1) * MILLISECONDS_PER_DAY)
-      const authorIssues = await githubRequest('GET', `${issuesPath}?creator=${author}&state=all&since=${rateLimitWindowStart.toISOString()}&per_page=${PAGE_SIZE}`)
+      const rateLimitWindowStart = new Date(
+        new Date(issue.created_at).getTime() - (config.rateLimit.days + 1) * MILLISECONDS_PER_DAY,
+      )
+      const authorIssues = await githubRequest(
+        'GET',
+        `${issuesPath}?creator=${author}&state=all&since=${rateLimitWindowStart.toISOString()}&per_page=${PAGE_SIZE}`,
+      )
       return authorIssues.filter((authorIssue) => !authorIssue.pull_request)
     },
     verifiedCount: async () => {
       const verifiedLabel = encodeURIComponent(config.labels.verified)
-      const verifiedIssues = await githubRequest('GET', `${issuesPath}?creator=${author}&state=all&labels=${verifiedLabel}&per_page=${PAGE_SIZE}`)
+      const verifiedIssues = await githubRequest(
+        'GET',
+        `${issuesPath}?creator=${author}&state=all&labels=${verifiedLabel}&per_page=${PAGE_SIZE}`,
+      )
       return verifiedIssues.filter((verifiedIssue) => verifiedIssue.number !== issue.number).length
     },
   }
@@ -90,7 +84,9 @@ function githubLookupsFor(issue, repo) {
 async function applyLabels(issue, issuePath, result) {
   const { verified, review, rejected } = config.labels
   const verdictLabel = { verified, review, reject: rejected }[result.verdict]
-  const outdatedTriageLabels = labelNamesOf(issue).filter((name) => triageLabelNames().includes(name) && name !== verdictLabel)
+  const outdatedTriageLabels = labelNamesOf(issue).filter(
+    (name) => triageLabelNames().includes(name) && name !== verdictLabel,
+  )
   for (const name of outdatedTriageLabels) {
     await githubRequest('DELETE', `${issuePath}/labels/${encodeURIComponent(name)}`)
   }
@@ -100,9 +96,12 @@ async function applyLabels(issue, issuePath, result) {
 
 async function upsertTriageComment(repo, issuePath, result) {
   const comments = await githubRequest('GET', `${issuePath}/comments?per_page=${PAGE_SIZE}`)
-  const previousTriageComment = comments.find((comment) => comment.user.type === 'Bot' && comment.body.startsWith(COMMENT_MARKER))
+  const previousTriageComment = comments.find(
+    (comment) => comment.user.type === 'Bot' && comment.body.startsWith(COMMENT_MARKER),
+  )
   const body = buildComment(result.language, result, repo, config.rateLimit)
-  if (previousTriageComment) await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousTriageComment.id}`, { body })
+  if (previousTriageComment)
+    await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousTriageComment.id}`, { body })
   else if (result.verdict !== 'verified') await githubRequest('POST', `${issuePath}/comments`, { body })
 }
 
@@ -127,15 +126,6 @@ async function triageIssue(issue, repo, isDryRun) {
   return result
 }
 
-export async function listOpenIssues(repo) {
-  const openIssues = []
-  for (let page = 1; ; page++) {
-    const pageIssues = await githubRequest('GET', `/repos/${repo}/issues?state=open&per_page=${PAGE_SIZE}&page=${page}`)
-    openIssues.push(...pageIssues)
-    if (pageIssues.length < PAGE_SIZE) return openIssues
-  }
-}
-
 function formatLogLine(issue, { verdict, reasons }) {
   return reasons.length ? `#${issue.number}: ${verdict} (${reasons.join(', ')})` : `#${issue.number}: ${verdict}`
 }
@@ -143,7 +133,9 @@ function formatLogLine(issue, { verdict, reasons }) {
 function formatTotals(rows) {
   const countByVerdict = {}
   for (const { verdict } of rows) countByVerdict[verdict] = (countByVerdict[verdict] ?? 0) + 1
-  const totals = ['verified', 'review', 'reject', 'skipped'].map((verdict) => `${countByVerdict[verdict] ?? 0} ${verdict}`)
+  const totals = ['verified', 'review', 'reject', 'skipped'].map(
+    (verdict) => `${countByVerdict[verdict] ?? 0} ${verdict}`,
+  )
   return `Totals: ${totals.join(', ')}.`
 }
 
@@ -157,7 +149,10 @@ function writeJobSummary(rows, repo, isDryRun) {
     '',
     '| Issue | Verdict | Reasons | Title |',
     '| --- | --- | --- | --- |',
-    ...rows.map(({ issue, verdict, reasons }) => `| ${issueLink(issue)} | ${verdict} | ${reasons.join(', ')} | ${escapeTableCell(issue.title)} |`),
+    ...rows.map(
+      ({ issue, verdict, reasons }) =>
+        `| ${issueLink(issue)} | ${verdict} | ${reasons.join(', ')} | ${escapeTableCell(issue.title)} |`,
+    ),
   ]
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
 }
@@ -200,9 +195,7 @@ async function main() {
   return triageFromIssueEvent(event, repo)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+export function run({ github }) {
+  useOctokit(github)
+  return main()
 }

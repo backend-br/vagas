@@ -8,7 +8,10 @@ const FORM_CONFIRMATION_LINE_PATTERN = /^\s*- \[[ xX]\] .*$/gm
 const MIN_NUMBERED_EMOJIS_IN_JOB_LIST = 3
 
 function toLowercaseWithoutAccents(text) {
-  return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
+  return text
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
 }
 
 function linkedHosts(text) {
@@ -17,7 +20,9 @@ function linkedHosts(text) {
 
 function highestLinkCountOnSameSite(text) {
   const linkCountBySite = {}
-  const distinctUrls = new Set([...text.matchAll(URL_PATTERN)].map((match) => match[0].replace(/^https?:\/\/(www\.)?/i, '').toLowerCase()))
+  const distinctUrls = new Set(
+    [...text.matchAll(URL_PATTERN)].map((match) => match[0].replace(/^https?:\/\/(www\.)?/i, '').toLowerCase()),
+  )
   for (const url of distinctUrls) {
     const site = url.split(/[/?#]/)[0]
     linkCountBySite[site] = (linkCountBySite[site] ?? 0) + 1
@@ -53,13 +58,18 @@ export function contentReasons(title, body, config) {
 
   if (linksToAnyDomain(hosts, config.blockedDomains)) reasons.push('ai_training')
   if (containsAnyTerm(normalizedText, config.terms.aiTraining)) reasons.push('ai_training')
-  const looksLikeJobList = countMatches(textWithoutFormConfirmations, NUMBERED_EMOJI_PATTERN) >= MIN_NUMBERED_EMOJIS_IN_JOB_LIST
-    || highestLinkCountOnSameSite(textWithoutFormConfirmations) > config.maxLinksPerSite
+  const looksLikeJobList =
+    countMatches(textWithoutFormConfirmations, NUMBERED_EMOJI_PATTERN) >= MIN_NUMBERED_EMOJIS_IN_JOB_LIST ||
+    highestLinkCountOnSameSite(textWithoutFormConfirmations) > config.maxLinksPerSite
   if (looksLikeJobList) reasons.push('multiple')
 
   if (linksToAnyDomain(hosts, config.reviewDomains)) reasons.push('suspicious_contact')
   if (containsAnyTerm(normalizedText, config.terms.crypto)) reasons.push('crypto')
-  if (containsAnyTerm(normalizedTitle, config.terms.unrelatedTitle) && !containsAnyTerm(normalizedTitle, config.terms.backendTitle)) reasons.push('not_backend')
+  if (
+    containsAnyTerm(normalizedTitle, config.terms.unrelatedTitle) &&
+    !containsAnyTerm(normalizedTitle, config.terms.backendTitle)
+  )
+    reasons.push('not_backend')
   const hasTooManyEmojis = countMatches(textWithoutFormConfirmations, EMOJI_PATTERN) >= config.lowEffort.emojis
   const hasTooManyHashtags = countMatches(textWithoutFormConfirmations, HASHTAG_PATTERN) >= config.lowEffort.hashtags
   if (hasTooManyEmojis || hasTooManyHashtags) reasons.push('low_effort')

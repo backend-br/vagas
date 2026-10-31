@@ -1,8 +1,13 @@
 import { appendFileSync, readFileSync } from 'node:fs'
-import { pathToFileURL } from 'node:url'
 import { parseForm, repositoryLabelsFromForm } from './form.mjs'
-import { FORMAT_COMMENT_MARKER, buildAppliedComment, buildFormatComment, needsFormatting, proposeFormat } from './format.mjs'
-import { githubRequest, listOpenIssues } from './triage.mjs'
+import {
+  FORMAT_COMMENT_MARKER,
+  buildAppliedComment,
+  buildFormatComment,
+  needsFormatting,
+  proposeFormat,
+} from './format.mjs'
+import { githubRequest, listOpenIssues, useOctokit } from './github.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
 const { labels } = config
@@ -20,14 +25,16 @@ function skipReason(issue) {
 
 async function formatCommentOf(issuePath) {
   const comments = await githubRequest('GET', `${issuePath}/comments?per_page=${PAGE_SIZE}`)
-  return comments.find((comment) => comment.user.type === 'Bot' && comment.body.startsWith(FORMAT_COMMENT_MARKER)) ?? null
+  return (
+    comments.find((comment) => comment.user.type === 'Bot' && comment.body.startsWith(FORMAT_COMMENT_MARKER)) ?? null
+  )
 }
 
 async function removeLabel(issuePath, name) {
   try {
     await githubRequest('DELETE', `${issuePath}/labels/${encodeURIComponent(name)}`)
   } catch (error) {
-    if (!String(error.message).includes(': 404 ')) throw error
+    if (error.status !== 404) throw error
   }
 }
 
@@ -42,12 +49,12 @@ function verdictOf(proposal) {
   return proposal.titleChanged ? 'title fixed' : 'already formatted'
 }
 
-// Fixes the title right away, since its changes are always safe, and only suggests the body of the form in a comment.
-// The suggestion is cleared once the body follows the form.
 async function suggest(issue, repo, isDryRun) {
   const proposal = proposeFormat(issue)
   const verdict = verdictOf(proposal)
-  console.log(`#${issue.number}: ${verdict}${proposal.missing.length ? ` (missing: ${proposal.missing.join(', ')})` : ''}`)
+  console.log(
+    `#${issue.number}: ${verdict}${proposal.missing.length ? ` (missing: ${proposal.missing.join(', ')})` : ''}`,
+  )
   if (isDryRun) return { issue, verdict, proposal }
 
   const issuePath = `/repos/${repo}/issues/${issue.number}`
@@ -55,7 +62,12 @@ async function suggest(issue, repo, isDryRun) {
   const previousComment = await formatCommentOf(issuePath)
   if (proposal.bodyChanged) {
     await githubRequest('POST', `${issuePath}/labels`, { labels: [labels.formatSuggested] })
-    await upsertComment(repo, issuePath, previousComment, buildFormatComment({ ...proposal, titleChanged: false }, labels.applyFormat))
+    await upsertComment(
+      repo,
+      issuePath,
+      previousComment,
+      buildFormatComment({ ...proposal, titleChanged: false }, labels.applyFormat),
+    )
   } else if (issue.labels.some((label) => label.name === labels.formatSuggested)) {
     await removeLabel(issuePath, labels.formatSuggested)
     if (previousComment) await githubRequest('DELETE', `/repos/${repo}/issues/comments/${previousComment.id}`)
@@ -64,12 +76,13 @@ async function suggest(issue, repo, isDryRun) {
 }
 
 async function canApply(repo, user) {
-  const { permission, role_name: roleName } = await githubRequest('GET', `/repos/${repo}/collaborators/${encodeURIComponent(user)}/permission`)
+  const { permission, role_name: roleName } = await githubRequest(
+    'GET',
+    `/repos/${repo}/collaborators/${encodeURIComponent(user)}/permission`,
+  )
   return ROLES_ALLOWED_TO_APPLY.includes(roleName) || ['admin', 'write'].includes(permission)
 }
 
-// Applies the format when a maintainer adds the apply label. The label can only be trusted from someone with
-// access to the repository, so it is taken off and nothing changes when anyone else adds it.
 async function applyFromLabel(issue, sender, repo) {
   const issuePath = `/repos/${repo}/issues/${issue.number}`
   await removeLabel(issuePath, labels.applyFormat)
@@ -86,7 +99,12 @@ async function applyFromLabel(issue, sender, repo) {
   const formLabels = repositoryLabelsFromForm(parseForm(proposal.body).fields)
   if (formLabels.length) await githubRequest('POST', `${issuePath}/labels`, { labels: formLabels })
   await removeLabel(issuePath, labels.formatSuggested)
-  await upsertComment(repo, issuePath, await formatCommentOf(issuePath), buildAppliedComment(proposal.language, sender.login))
+  await upsertComment(
+    repo,
+    issuePath,
+    await formatCommentOf(issuePath),
+    buildAppliedComment(proposal.language, sender.login),
+  )
   console.log(`#${issue.number}: applied by ${sender.login}`)
   return { issue, verdict: 'applied' }
 }
@@ -99,19 +117,25 @@ function writeJobSummary(rows, repo, isDryRun) {
     '',
     '| Issue | Verdict | Suggested title | Missing |',
     '| --- | --- | --- | --- |',
-    ...rows.map(({ issue, verdict, proposal }) =>
-      `| ${issueLink(issue)} | ${verdict} | ${escapeTableCell(proposal?.titleChanged ? proposal.title : '')} | ${escapeTableCell(proposal?.missing.join(', ') ?? '')} |`),
+    ...rows.map(
+      ({ issue, verdict, proposal }) =>
+        `| ${issueLink(issue)} | ${verdict} | ${escapeTableCell(proposal?.titleChanged ? proposal.title : '')} | ${escapeTableCell(proposal?.missing.join(', ') ?? '')} |`,
+    ),
   ]
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
 }
 
-// While automatic runs are a dry run, an issue event only reports what would happen and the apply label stays.
 async function fromIssueEvent(event, repo) {
   const isDryRun = config.automaticRunsDryRun
   if (isDryRun) console.log('Dry run: automatic runs do not change labels, comments or issues.')
   if (event.action === 'labeled') {
     if (event.label?.name !== labels.applyFormat) return
-    if (isDryRun) return writeJobSummary([{ issue: event.issue, verdict: 'would apply', proposal: proposeFormat(event.issue) }], repo, true)
+    if (isDryRun)
+      return writeJobSummary(
+        [{ issue: event.issue, verdict: 'would apply', proposal: proposeFormat(event.issue) }],
+        repo,
+        true,
+      )
     return writeJobSummary([await applyFromLabel(event.issue, event.sender, repo)], repo, false)
   }
   const reason = skipReason(event.issue)
@@ -144,9 +168,7 @@ async function main() {
   return fromIssueEvent(event, repo)
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+export function run({ github }) {
+  useOctokit(github)
+  return main()
 }

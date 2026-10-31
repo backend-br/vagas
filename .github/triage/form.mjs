@@ -29,25 +29,49 @@ export const FIELD_LABELS_BY_LANGUAGE = {
   },
 }
 
-export const REQUIRED_FIELDS = ['company', 'companyUrl', 'description', 'requirements', 'level', 'contract', 'workModel', 'apply']
+export const REQUIRED_FIELDS = [
+  'company',
+  'companyUrl',
+  'description',
+  'requirements',
+  'level',
+  'contract',
+  'workModel',
+  'apply',
+]
 
 const REPOSITORY_LABEL_BY_DROPDOWN_VALUE = {
-  Estagiário: 'Estagiário', Intern: 'Estagiário',
-  Júnior: 'Júnior', Junior: 'Júnior',
-  Pleno: 'Pleno', 'Mid-level': 'Pleno',
-  Sênior: 'Sênior', Senior: 'Sênior',
-  Especialista: 'Especialista', 'Staff/Principal': 'Especialista',
-  CLT: 'CLT', PJ: 'PJ', Contrato: 'Contrato', Contractor: 'Contrato', Freelance: 'Freelance',
-  Remoto: 'Remoto', Remote: 'Remoto',
-  Híbrido: 'Híbrido', Hybrid: 'Híbrido',
-  Presencial: 'Presencial', 'On-site': 'Presencial',
+  Estagiário: 'Estagiário',
+  Intern: 'Estagiário',
+  Júnior: 'Júnior',
+  Junior: 'Júnior',
+  Pleno: 'Pleno',
+  'Mid-level': 'Pleno',
+  Sênior: 'Sênior',
+  Senior: 'Sênior',
+  Especialista: 'Especialista',
+  'Staff/Principal': 'Especialista',
+  CLT: 'CLT',
+  PJ: 'PJ',
+  Contrato: 'Contrato',
+  Contractor: 'Contrato',
+  Freelance: 'Freelance',
+  Remoto: 'Remoto',
+  Remote: 'Remoto',
+  Híbrido: 'Híbrido',
+  Hybrid: 'Híbrido',
+  Presencial: 'Presencial',
+  'On-site': 'Presencial',
 }
 
 const MIN_DESCRIPTION_LENGTH = 80
 
 function valuesByHeading(body) {
   const valueByHeading = {}
-  const sections = (body ?? '').replace(/\r\n/g, '\n').split(/^###\s+/m).slice(1)
+  const sections = (body ?? '')
+    .replace(/\r\n/g, '\n')
+    .split(/^###\s+/m)
+    .slice(1)
   for (const section of sections) {
     const headingEnd = section.indexOf('\n')
     const heading = (headingEnd === -1 ? section : section.slice(0, headingEnd)).trim()
@@ -65,7 +89,8 @@ function bestMatchingForm(valueByHeading) {
       if (label in valueByHeading) fields[field] = valueByHeading[label]
     }
     const matchedFieldCount = Object.keys(fields).length
-    if (!bestMatch || matchedFieldCount > bestMatch.matchedFieldCount) bestMatch = { language, fields, matchedFieldCount }
+    if (!bestMatch || matchedFieldCount > bestMatch.matchedFieldCount)
+      bestMatch = { language, fields, matchedFieldCount }
   }
   return bestMatch
 }
@@ -79,7 +104,8 @@ function isFormComplete(fields) {
 
 export function parseForm(body) {
   const bestMatch = bestMatchingForm(valuesByHeading(body))
-  if (bestMatch.matchedFieldCount < REQUIRED_FIELDS.length / 2) return { language: null, fields: {}, problems: ['form'] }
+  if (bestMatch.matchedFieldCount < REQUIRED_FIELDS.length / 2)
+    return { language: null, fields: {}, problems: ['form'] }
   const { language, fields } = bestMatch
   return { language, fields, problems: isFormComplete(fields) ? [] : ['form'] }
 }

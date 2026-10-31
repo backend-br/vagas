@@ -1,8 +1,15 @@
 import { appendFileSync, readFileSync } from 'node:fs'
-import { pathToFileURL } from 'node:url'
 import { issueLanguage } from './language.mjs'
-import { LINK_COMMENT_MARKER, applyLinksOf, buildLinkComment, classifyAnswer, decideLinkAction, linksOf, sinceOf } from './links.mjs'
-import { githubRequest, listOpenIssues } from './triage.mjs'
+import {
+  LINK_COMMENT_MARKER,
+  applyLinksOf,
+  buildLinkComment,
+  classifyAnswer,
+  decideLinkAction,
+  linksOf,
+  sinceOf,
+} from './links.mjs'
+import { githubRequest, listOpenIssues, useOctokit } from './github.mjs'
 
 const config = JSON.parse(readFileSync(new URL('./config.json', import.meta.url)))
 const { linkCheck, labels } = config
@@ -27,7 +34,6 @@ async function answerOf(url) {
   }
 }
 
-// A link is only broken when every attempt says the page is gone, so a passing hiccup never flags a job.
 async function stateOf(url) {
   for (let attempt = 1; attempt <= linkCheck.attempts; attempt++) {
     const answer = await answerOf(url)
@@ -56,7 +62,7 @@ async function removeLabel(issuePath, name) {
   try {
     await githubRequest('DELETE', `${issuePath}/labels/${encodeURIComponent(name)}`)
   } catch (error) {
-    if (!String(error.message).includes(': 404 ')) throw error
+    if (error.status !== 404) throw error
   }
 }
 
@@ -70,9 +76,11 @@ async function applyDecision(repo, issue, decision, brokenLinks, previousComment
   const language = issueLanguage(issue)
   const body = buildLinkComment(decision, brokenLinks, language, linkCheck.closeAfterDays)
   await githubRequest('POST', `${issuePath}/labels`, { labels: [labels.brokenLink] })
-  if (previousComment && previousComment.body !== body) await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousComment.id}`, { body })
+  if (previousComment && previousComment.body !== body)
+    await githubRequest('PATCH', `/repos/${repo}/issues/comments/${previousComment.id}`, { body })
   if (!previousComment) await githubRequest('POST', `${issuePath}/comments`, { body })
-  if (decision.action === 'close') await githubRequest('PATCH', issuePath, { state: 'closed', state_reason: 'not_planned' })
+  if (decision.action === 'close')
+    await githubRequest('PATCH', issuePath, { state: 'closed', state_reason: 'not_planned' })
 }
 
 function writeJobSummary(rows, repo, isDryRun) {
@@ -86,8 +94,10 @@ function writeJobSummary(rows, repo, isDryRun) {
     '',
     '| Issue | Action | Broken links | Unknown links |',
     '| --- | --- | --- | --- |',
-    ...acted.map(({ issue, action, brokenLinks, unknownLinks }) =>
-      `| ${issueLink(issue)} | ${action} | ${escapeTableCell(brokenLinks.join(' '))} | ${escapeTableCell(unknownLinks.join(' '))} |`),
+    ...acted.map(
+      ({ issue, action, brokenLinks, unknownLinks }) =>
+        `| ${issueLink(issue)} | ${action} | ${escapeTableCell(brokenLinks.join(' '))} | ${escapeTableCell(unknownLinks.join(' '))} |`,
+    ),
   ]
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
 }
@@ -109,7 +119,9 @@ export async function checkIssues(issues, repo, isDryRun, today = new Date().toI
     const links = linksOf(issue.body, linkCheck.skipDomains)
     const states = await Promise.all(links.map(async (url) => ({ url, ...(await stateByUrl.get(url)) })))
     const brokenLinks = states.filter(({ state }) => state === 'broken').map(({ url }) => url)
-    const unknownLinks = states.filter(({ state }) => state === 'unknown').map(({ url, answer }) => `${url} (${answer})`)
+    const unknownLinks = states
+      .filter(({ state }) => state === 'unknown')
+      .map(({ url, answer }) => `${url} (${answer})`)
     const isFlagged = issue.labels.some((label) => label.name === labels.brokenLink)
     const issuePath = `/repos/${repo}/issues/${issue.number}`
     const previousComment = brokenLinks.length || isFlagged ? await linkCommentOf(issuePath) : null
@@ -121,7 +133,8 @@ export async function checkIssues(issues, repo, isDryRun, today = new Date().toI
       closeAfterDays: linkCheck.closeAfterDays,
     })
     console.log(`#${issue.number}: ${decision.action}${brokenLinks.length ? ` (${brokenLinks.join(' ')})` : ''}`)
-    if (!isDryRun && decision.action !== 'none') await applyDecision(repo, issue, decision, brokenLinks, previousComment)
+    if (!isDryRun && decision.action !== 'none')
+      await applyDecision(repo, issue, decision, brokenLinks, previousComment)
     rows.push({ issue, action: decision.action, brokenLinks, unknownLinks })
   }
   writeJobSummary(rows, repo, isDryRun)
@@ -132,17 +145,21 @@ async function main() {
   const repo = process.env.GITHUB_REPOSITORY
   const isManualRun = process.env.GITHUB_EVENT_NAME === 'workflow_dispatch'
   const inputs = isManualRun ? JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH)).inputs : {}
-  const isDryRun = isManualRun ? inputs['dry-run'] !== 'false' && inputs['dry-run'] !== false : config.automaticRunsDryRun
+  const isDryRun = isManualRun
+    ? inputs['dry-run'] !== 'false' && inputs['dry-run'] !== false
+    : config.automaticRunsDryRun
   if (isDryRun) console.log('Dry run: labels, comments and states will not change.')
   const issues = inputs.issue
     ? [await githubRequest('GET', `/repos/${repo}/issues/${Number(inputs.issue)}`)]
     : await listOpenIssues(repo)
-  await checkIssues(issues.filter((issue) => issue.state === 'open'), repo, isDryRun)
+  await checkIssues(
+    issues.filter((issue) => issue.state === 'open'),
+    repo,
+    isDryRun,
+  )
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main().catch((error) => {
-    console.error(error)
-    process.exit(1)
-  })
+export function run({ github }) {
+  useOctokit(github)
+  return main()
 }
