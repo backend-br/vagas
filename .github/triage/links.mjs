@@ -32,15 +32,12 @@ export function linksOf(text, skipDomains = []) {
   })
 }
 
-// Only answers that say the page is gone count as broken. Blocks, rate limits, timeouts and server errors say
-// nothing about the job, so they are unknown and never act on an issue.
 export function classifyAnswer(answer, brokenStatuses) {
   if (typeof answer === 'number' && brokenStatuses.includes(answer)) return 'broken'
   if (typeof answer === 'number' && answer < 400) return 'ok'
   return 'unknown'
 }
 
-// The links someone applies through: those of the "how to apply" field, or every link of the post when it has none.
 export function applyLinksOf(body, skipDomains = []) {
   const form = parseForm(body)
   if (form.language !== null) return linksOf(form.fields.apply, skipDomains)
@@ -59,8 +56,6 @@ export function sinceOf(commentBody) {
   return SINCE_PATTERN.exec(commentBody ?? '')?.[1] ?? null
 }
 
-// Decides what to do with an issue from the state of its links. An issue is only closed when every link to apply
-// has been gone for the whole grace period, so a site that is down for a day never closes a job.
 export function decideLinkAction({ brokenLinks, applyLinks, since, today, closeAfterDays }) {
   if (!brokenLinks.length) return { action: since ? 'recovered' : 'none', since: null }
   const firstSeen = since ?? today

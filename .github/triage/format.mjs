@@ -92,7 +92,6 @@ const HEADINGS_BY_FIELD = {
   },
 }
 
-// Sections of the old Markdown template that only listed labels, and the form's own checkboxes.
 const DISCARDED_HEADINGS = ['labels', 'categoria', 'confirmacoes', 'confirmations']
 
 const OPTION_TERMS = {
@@ -202,8 +201,6 @@ function titlePrefix(title) {
   return TITLE_PREFIX_PATTERN.exec(title)?.[1] ?? ''
 }
 
-// Reads the facets from the issue labels first, since the moderation sets them, then from the sections that name
-// them, then from the prefix of the title. Free text is never read, where a word like "remoto" may be negated.
 function optionsOf(facet, { labelNames, sectionTexts, title }) {
   const fromLabels = uniqueOptions(...labelNames.map((name) => optionsIn(name, facet)))
   if (fromLabels.length) return fromLabels
@@ -235,7 +232,6 @@ function readSections(body) {
       continue
     }
     if (currentField === 'discarded') continue
-    // A heading the form does not know stays with the field it falls under, so no text is ever dropped.
     append(currentField, [`**${section.heading}**`, section.text].filter(Boolean).join('\n\n'))
   }
   return { textByField, matchedLanguages }
@@ -290,8 +286,6 @@ function usesTemplatePlaceholder(title) {
   )
 }
 
-// Proposes the title and the body of an issue in the shape of the issue forms, built only from what the issue
-// already says. Nothing is invented: a field the issue does not fill is left empty and reported as missing.
 export function proposeFormat(issue) {
   const labelNames = (issue.labels ?? []).map((label) => (typeof label === 'string' ? label : label.name))
   const body = issue.body ?? ''
@@ -313,7 +307,6 @@ export function proposeFormat(issue) {
       const options = optionsOf(facet, facets)
       if (!options.length) continue
       const sectionText = textByField[facet] ?? ''
-      // A section that said more than the option, such as the salary beside the contract, keeps its text.
       if (sectionText && !saysOnlyOptions(sectionText, facet)) {
         fields.description = [fields.description, `**${FIELD_LABELS_BY_LANGUAGE[language][facet]}:** ${sectionText}`]
           .filter(Boolean)

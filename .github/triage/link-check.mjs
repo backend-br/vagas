@@ -34,7 +34,6 @@ async function answerOf(url) {
   }
 }
 
-// A link is only broken when every attempt says the page is gone, so a passing hiccup never flags a job.
 async function stateOf(url) {
   for (let attempt = 1; attempt <= linkCheck.attempts; attempt++) {
     const answer = await answerOf(url)

@@ -49,8 +49,6 @@ function verdictOf(proposal) {
   return proposal.titleChanged ? 'title fixed' : 'already formatted'
 }
 
-// Fixes the title right away, since its changes are always safe, and only suggests the body of the form in a comment.
-// The suggestion is cleared once the body follows the form.
 async function suggest(issue, repo, isDryRun) {
   const proposal = proposeFormat(issue)
   const verdict = verdictOf(proposal)
@@ -85,8 +83,6 @@ async function canApply(repo, user) {
   return ROLES_ALLOWED_TO_APPLY.includes(roleName) || ['admin', 'write'].includes(permission)
 }
 
-// Applies the format when a maintainer adds the apply label. The label can only be trusted from someone with
-// access to the repository, so it is taken off and nothing changes when anyone else adds it.
 async function applyFromLabel(issue, sender, repo) {
   const issuePath = `/repos/${repo}/issues/${issue.number}`
   await removeLabel(issuePath, labels.applyFormat)
@@ -129,7 +125,6 @@ function writeJobSummary(rows, repo, isDryRun) {
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join('\n')}\n`)
 }
 
-// While automatic runs are a dry run, an issue event only reports what would happen and the apply label stays.
 async function fromIssueEvent(event, repo) {
   const isDryRun = config.automaticRunsDryRun
   if (isDryRun) console.log('Dry run: automatic runs do not change labels, comments or issues.')
