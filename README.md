@@ -45,8 +45,9 @@ Três rotinas cuidam das vagas já publicadas, sem uso de IA:
 - **Perfis compatíveis:** toda vaga `verificada` recebe um comentário com até 5 perfis do
   [me-contrata](https://github.com/backend-br/me-contrata) que pediram para ser divulgados. Entram só perfis com o mesmo
   nível, ao menos um regime e um modelo de trabalho em comum, a mesma UF quando a vaga é híbrida ou presencial, e ao
-  menos 2 tecnologias em comum (ou a única, quando a vaga tem uma só). Ninguém é mencionado. O comentário é atualizado
-  todo dia, e some quando nenhum perfil combina mais.
+  menos 2 tecnologias em comum (ou a única, quando a vaga tem uma só). Nível, regime ou modelo que a vaga não informa
+  aceitam qualquer perfil. Ninguém é mencionado. O comentário é atualizado todo dia, e some quando nenhum perfil combina
+  mais.
 
 As três rodam também pela aba Actions, para uma issue ou para todas, em modo de simulação por padrão. Enquanto
 `automaticRunsDryRun` estiver `true` em `.github/triage/config.json`, as execuções automáticas (agendadas e por

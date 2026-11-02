@@ -155,14 +155,18 @@ function common(first, second) {
   return first.filter((value) => second.includes(value))
 }
 
+function shares(jobValues, profileValues) {
+  return !jobValues.length || common(jobValues, profileValues).length > 0
+}
+
 export function matchOf(job, profile, minCommonStacks) {
-  if (!common(job.levels, profile.levels).length) return null
-  if (!common(job.contracts, profile.contracts).length) return null
-  const workModels = common(job.workModels, profile.workModels)
-  if (!workModels.length) return null
-  const needsSameState = !workModels.includes(REMOTE_WORK_MODEL)
-  if (needsSameState && !common(job.ufs, profile.ufs).length) return null
   if (!job.stacks.length) return null
+  if (!shares(job.levels, profile.levels)) return null
+  if (!shares(job.contracts, profile.contracts)) return null
+  if (!shares(job.workModels, profile.workModels)) return null
+  const workModels = job.workModels.length ? common(job.workModels, profile.workModels) : profile.workModels
+  const needsSameState = workModels.length > 0 && !workModels.includes(REMOTE_WORK_MODEL)
+  if (needsSameState && !common(job.ufs, profile.ufs).length) return null
   const stacks = common(job.stacks, profile.stacks)
   if (stacks.length < Math.min(minCommonStacks, job.stacks.length)) return null
   return { profile, workModels, stacks }

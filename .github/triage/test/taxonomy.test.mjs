@@ -26,26 +26,125 @@ function dropdownOptions(form, id) {
   return options
 }
 
-test('maps aliases of every facet to the label name', () => {
-  assert.equal(canonicalName(taxonomy, 'levels', 'Staff/Principal'), 'Especialista')
-  assert.equal(canonicalName(taxonomy, 'workModels', 'hybrid'), 'Híbrido')
-  assert.equal(canonicalName(taxonomy, 'contracts', 'Estágio'), null)
-  assert.deepEqual(canonicalNames(taxonomy, 'contracts', 'CLT, Contractor, CLT'), ['CLT', 'Contrato'])
+test('maps a level alias to the label name', () => {
+  // Given an alias of a level
+  const alias = 'Staff/Principal'
+
+  // When the name is looked up
+  const name = canonicalName(taxonomy, 'levels', alias)
+
+  // Then it is the label name
+  assert.equal(name, 'Especialista')
 })
 
-test('finds stacks as whole terms only', () => {
-  assert.deepEqual(stacksInText(taxonomy, 'Java, Kafka e Postgres'), ['Apache Kafka', 'Java', 'PostgreSQL'])
-  assert.deepEqual(stacksInText(taxonomy, 'JavaScript e MySQL'), ['JavaScript', 'MySQL'])
-  assert.deepEqual(stacksInText(taxonomy, 'C# com .NET'), ['.NET', 'C#'])
-  assert.deepEqual(stacksInText(taxonomy, 'Node.js'), ['Node.js'])
+test('maps a work model alias to the label name, whatever the case', () => {
+  // Given an alias of a work model in lower case
+  const alias = 'hybrid'
+
+  // When the name is looked up
+  const name = canonicalName(taxonomy, 'workModels', alias)
+
+  // Then it is the label name
+  assert.equal(name, 'Híbrido')
+})
+
+test('a name from another facet maps to nothing', () => {
+  // Given a level used as a contract
+  const alias = 'Estágio'
+
+  // When the name is looked up
+  const name = canonicalName(taxonomy, 'contracts', alias)
+
+  // Then there is no match
+  assert.equal(name, null)
+})
+
+test('maps a list of contracts to label names without repeating any', () => {
+  // Given a list with an alias and a repeated name
+  const text = 'CLT, Contractor, CLT'
+
+  // When the names are looked up
+  const names = canonicalNames(taxonomy, 'contracts', text)
+
+  // Then each label comes once
+  assert.deepEqual(names, ['CLT', 'Contrato'])
+})
+
+test('finds stacks by name and alias as whole terms', () => {
+  // Given a text with a name and two aliases
+  const text = 'Java, Kafka e Postgres'
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then each one comes by its name
+  assert.deepEqual(stacks, ['Apache Kafka', 'Java', 'PostgreSQL'])
+})
+
+test('a stack that contains another is not found inside it', () => {
+  // Given a text with JavaScript and MySQL
+  const text = 'JavaScript e MySQL'
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then Java and SQL are not among them
+  assert.deepEqual(stacks, ['JavaScript', 'MySQL'])
+})
+
+test('finds stacks whose names have symbols', () => {
+  // Given a text with C# and .NET
+  const text = 'C# com .NET'
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then both are found
+  assert.deepEqual(stacks, ['.NET', 'C#'])
+})
+
+test('finds a stack with a dot in its name', () => {
+  // Given a text with Node.js
+  const text = 'Node.js'
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then only Node.js is found
+  assert.deepEqual(stacks, ['Node.js'])
+})
+
+test('case sensitive stacks are found by their alias', () => {
+  // Given a text with the common word and the alias of Go
+  const text = "Let's go live with Golang"
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then Go is found once
+  assert.deepEqual(stacks, ['Go'])
 })
 
 test('case sensitive stacks ignore the common word', () => {
-  assert.deepEqual(stacksInText(taxonomy, "Let's go live with Golang"), ['Go'])
-  assert.deepEqual(stacksInText(taxonomy, "let's go"), [])
+  // Given a text with only the common word
+  const text = "let's go"
+
+  // When the stacks are found
+  const stacks = stacksInText(taxonomy, text)
+
+  // Then no stack is found
+  assert.deepEqual(stacks, [])
 })
 
-test('the stacks of the forms are the shared taxonomy stacks', { skip: !process.env.TAXONOMY_FILE }, () => {
-  const names = loadTaxonomy().stacks.map((stack) => stack.name)
-  for (const form of FORMS) assert.deepEqual(dropdownOptions(form, 'stack'), names, form)
-})
+for (const form of FORMS) {
+  test(`the stacks of ${form} are the shared taxonomy stacks`, { skip: !process.env.TAXONOMY_FILE }, () => {
+    // Given the stacks of the shared taxonomy
+    const names = loadTaxonomy().stacks.map((stack) => stack.name)
+
+    // When the options of the form are read
+    const options = dropdownOptions(form, 'stack')
+
+    // Then they are the same stacks
+    assert.deepEqual(options, names, form)
+  })
+}
