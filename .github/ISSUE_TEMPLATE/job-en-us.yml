@@ -152,6 +152,12 @@ body:
       label: Location
       description: City and state or country, if hybrid or on-site.
       placeholder: São Paulo - SP
+  - type: input
+    id: valid-through
+    attributes:
+      label: Valid until
+      description: Last day to apply, as YYYY-MM-DD. Leave blank if there is no deadline.
+      placeholder: 2026-12-31
   - type: textarea
     id: apply
     attributes:

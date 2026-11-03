@@ -152,6 +152,12 @@ body:
       label: Localização
       description: Cidade e UF, se híbrido ou presencial.
       placeholder: São Paulo - SP
+  - type: input
+    id: valid-through
+    attributes:
+      label: Válida até
+      description: Último dia para se candidatar, no formato AAAA-MM-DD. Deixe em branco se não houver prazo.
+      placeholder: 2026-12-31
   - type: textarea
     id: apply
     attributes:
