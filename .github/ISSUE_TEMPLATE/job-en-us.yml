@@ -44,7 +44,9 @@ body:
       multiple: true
       options:
         - ".NET"
+        - Apache Flink
         - Apache Kafka
+        - Apache Pulsar
         - ASP
         - AWS
         - Azure
@@ -67,6 +69,7 @@ body:
         - GCP
         - Git
         - Go
+        - Grafana
         - GraphQL
         - gRPC
         - Hexagonal architecture
@@ -75,6 +78,7 @@ body:
         - Jenkins
         - Kotlin
         - Kubernetes
+        - LangChain
         - Laravel
         - Linux
         - Microservices
@@ -83,9 +87,11 @@ body:
         - NestJS
         - Node.js
         - OOP
+        - OpenTelemetry
         - Oracle
         - PHP
         - PostgreSQL
+        - Prometheus
         - Python
         - RabbitMQ
         - Redis
